@@ -1,4 +1,3 @@
-import { supabase } from "../supabaseClient.js";
 import { useEffect, useState } from "react";
 import {
   BarChart,
@@ -9,6 +8,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { supabase } from "../supabaseClient.js";
 
 const BAR_COLOR = "#4a1942";
 

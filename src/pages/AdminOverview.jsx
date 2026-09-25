@@ -1,6 +1,6 @@
-import { supabase } from "../supabaseClient.js";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "../supabaseClient.js";
 
 export default function AdminOverview() {
   const [stats, setStats] = useState({ voters: 0, voted: 0, candidates: 0, pending: 0 });

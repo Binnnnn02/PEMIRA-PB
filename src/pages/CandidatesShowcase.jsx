@@ -1,6 +1,6 @@
-import { supabase } from "../supabaseClient.js";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "../supabaseClient.js";
 
 export default function CandidatesShowcase() {
   const [candidates, setCandidates] = useState([]);

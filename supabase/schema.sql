@@ -294,3 +294,118 @@ create policy "admin can delete candidate photos"
 -- ============================================================
 alter publication supabase_realtime add table votes;
 alter publication supabase_realtime add table candidate_applications;
+
+-- ============================================================
+-- 6. Data siswa dan daftar ulang PEMIRA
+-- ============================================================
+create table if not exists students (
+  id uuid primary key default gen_random_uuid(),
+  nis text not null unique,
+  full_name text not null,
+  class_name text not null,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists students_class_name_idx on students (class_name);
+
+alter table students enable row level security;
+
+create policy "students managed by admin"
+  on students for all
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
+
+-- View publik hanya mengekspos kolom yang dibutuhkan untuk pilihan kelas/nama.
+create or replace view student_directory as
+select id, class_name, full_name
+from students
+where is_active = true;
+
+grant select on student_directory to anon, authenticated;
+
+create table if not exists re_registrations (
+  id uuid primary key default gen_random_uuid(),
+  election_id int not null references election_settings(id) on delete cascade default 1,
+  student_id uuid not null references students(id) on delete restrict,
+  phone_number text not null,
+  status text not null default 'registered'
+    check (status in ('registered', 'token_ready', 'sent')),
+  token_sent_at timestamptz,
+  created_at timestamptz not null default now(),
+  unique (election_id, student_id),
+  unique (election_id, phone_number)
+);
+
+create index if not exists re_registrations_election_idx on re_registrations (election_id);
+create index if not exists re_registrations_student_idx on re_registrations (student_id);
+
+alter table re_registrations enable row level security;
+
+create policy "admin can view re-registrations"
+  on re_registrations for select
+  using (auth.role() = 'authenticated');
+
+create policy "admin can update re-registrations"
+  on re_registrations for update
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
+
+alter table voters add column if not exists student_id uuid references students(id) on delete set null;
+alter table voters add column if not exists registration_id uuid references re_registrations(id) on delete set null;
+alter table voters add column if not exists token_sent_at timestamptz;
+create unique index if not exists voters_registration_id_idx on voters (registration_id) where registration_id is not null;
+
+-- Fungsi publik untuk daftar ulang. Data pendaftaran tidak dibuka untuk select publik.
+create or replace function submit_re_registration(
+  p_election_id int,
+  p_student_id uuid,
+  p_phone_number text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  normalized_phone text;
+begin
+  normalized_phone := regexp_replace(p_phone_number, '[^0-9]', '', 'g');
+
+  if not exists (
+    select 1 from students
+    where id = p_student_id and is_active = true
+  ) then
+    return jsonb_build_object('success', false, 'reason', 'invalid_student');
+  end if;
+
+  if normalized_phone !~ '^08[0-9]{8,13}$' then
+    return jsonb_build_object('success', false, 'reason', 'invalid_phone');
+  end if;
+
+  if exists (
+    select 1 from re_registrations
+    where election_id = p_election_id and student_id = p_student_id
+  ) then
+    return jsonb_build_object('success', false, 'reason', 'already_registered');
+  end if;
+
+  if exists (
+    select 1 from re_registrations
+    where election_id = p_election_id and phone_number = normalized_phone
+  ) then
+    return jsonb_build_object('success', false, 'reason', 'phone_used');
+  end if;
+
+  insert into re_registrations (election_id, student_id, phone_number)
+  values (p_election_id, p_student_id, normalized_phone);
+
+  return jsonb_build_object('success', true);
+exception
+  when unique_violation then
+    return jsonb_build_object('success', false, 'reason', 'already_registered');
+end;
+$$;
+
+revoke all on function submit_re_registration(int, uuid, text) from public;
+grant execute on function submit_re_registration(int, uuid, text) to anon, authenticated;

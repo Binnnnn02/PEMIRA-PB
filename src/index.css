@@ -424,7 +424,8 @@ button {
 }
 
 .form-field input,
-.form-field textarea {
+.form-field textarea,
+.form-field select {
   font-family: var(--font-body);
   font-size: 14px;
   padding: 10px 12px;

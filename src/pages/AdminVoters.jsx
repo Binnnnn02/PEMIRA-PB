@@ -1,5 +1,5 @@
-import { supabase } from "../supabaseClient.js";
 import { useEffect, useState } from "react";
+import { supabase } from "../supabaseClient.js";
 
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // tanpa 0/O/1/I agar tak rancu
 const CODE_LENGTH = 6;

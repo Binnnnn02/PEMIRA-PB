@@ -1,9 +1,10 @@
-import { supabase } from "../supabaseClient.js";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient.js";
 
 const links = [
   { to: "overview", label: "Ringkasan" },
   { to: "applications", label: "Pendaftaran Calon" },
+  { to: "daftar-ulang", label: "Daftar Ulang" },
   { to: "candidates", label: "Kandidat" },
   { to: "voters", label: "Pemilih" },
   { to: "results", label: "Hasil Suara" },

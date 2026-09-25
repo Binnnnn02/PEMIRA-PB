@@ -1,6 +1,6 @@
-import { supabase } from "../supabaseClient.js";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "../supabaseClient.js";
 import Countdown from "../components/Countdown.jsx";
 
 export default function HomePage() {
@@ -40,6 +40,7 @@ export default function HomePage() {
         <nav>
           <Link to="/kandidat">Kandidat</Link>
           <Link to="/pendaftaran-calon">Daftar Calon</Link>
+          <Link to="/daftar-ulang">Daftar Ulang</Link>
           <Link to="/pilih" className="home-nav-cta">
             Masuk Memilih
           </Link>
@@ -63,6 +64,9 @@ export default function HomePage() {
           </Link>
           <Link to="/pendaftaran-calon" className="btn btn-outline" style={{ width: "auto" }}>
             Daftar sebagai Calon
+          </Link>
+          <Link to="/daftar-ulang" className="btn btn-outline" style={{ width: "auto" }}>
+            Daftar Ulang PEMIRA
           </Link>
         </div>
 

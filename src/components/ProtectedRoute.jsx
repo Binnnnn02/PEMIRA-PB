@@ -1,6 +1,6 @@
-import { supabase } from "../supabaseClient.js";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import { supabase } from "../supabaseClient.js";
 
 export default function ProtectedRoute({ children }) {
   const [status, setStatus] = useState("checking"); // checking | in | out

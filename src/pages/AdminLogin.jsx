@@ -1,6 +1,6 @@
-import { supabase } from "../supabaseClient.js";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient.js";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");

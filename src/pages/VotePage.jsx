@@ -1,6 +1,6 @@
-import { supabase } from "../supabaseClient.js";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "../supabaseClient.js";
 import Countdown from "../components/Countdown.jsx";
 
 const CODE_LENGTH = 6;

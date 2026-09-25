@@ -1,5 +1,5 @@
-import { supabase } from "../supabaseClient.js";
 import { useEffect, useState } from "react";
+import { supabase } from "../supabaseClient.js";
 
 export default function AdminApplications() {
   const [applications, setApplications] = useState([]);
