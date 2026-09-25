@@ -68,9 +68,23 @@ export default function AdminVoters() {
   }
 
   async function remove(id) {
-    if (!confirm("Hapus pemilih ini?")) return;
-    await supabase.from("voters").delete().eq("id", id);
-    load();
+    if (!confirm("Hapus pemilih ini? Pemilih yang sudah memberikan suara tidak dapat dihapus.")) return;
+    setError("");
+
+    const { error: deleteError } = await supabase
+      .from("voters")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) {
+      const message = deleteError.code === "23503"
+        ? "Pemilih tidak bisa dihapus karena sudah memiliki suara. Pertahankan data ini agar riwayat PEMIRA tetap utuh."
+        : "Gagal menghapus pemilih: " + deleteError.message;
+      setError(message);
+      return;
+    }
+
+    await load();
   }
 
   function downloadCsv() {

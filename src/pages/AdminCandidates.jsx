@@ -94,9 +94,23 @@ export default function AdminCandidates() {
   }
 
   async function remove(id) {
-    if (!confirm("Hapus kandidat ini? Suara yang sudah masuk untuk kandidat ini tidak bisa dihapus bersamaan.")) return;
-    await supabase.from("candidates").delete().eq("id", id);
-    load();
+    if (!confirm("Hapus kandidat ini? Kandidat yang sudah memiliki suara tidak dapat dihapus agar hasil pemilihan tetap aman.")) return;
+    setError("");
+
+    const { error: deleteError } = await supabase
+      .from("candidates")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) {
+      const message = deleteError.code === "23503"
+        ? "Kandidat tidak bisa dihapus karena sudah memiliki suara. Hapus hanya kandidat yang belum dipilih, agar hasil PEMIRA tidak rusak."
+        : "Gagal menghapus kandidat: " + deleteError.message;
+      setError(message);
+      return;
+    }
+
+    await load();
   }
 
   return (
