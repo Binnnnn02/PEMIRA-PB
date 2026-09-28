@@ -36,7 +36,7 @@ export default function HomePage() {
   return (
     <div className="home">
       <header className="home-nav">
-        <div className="home-nav-brand">"PEMIRA"</div>
+        <div className="home-nav-brand">Portal Pemira</div>
         <nav>
           <Link to="/kandidat">Kandidat</Link>
           <Link to="/pendaftaran-calon">Daftar Calon</Link>
@@ -154,7 +154,8 @@ export default function HomePage() {
       </section>
 
       <footer className="home-footer">
-        {settings?.organization || "Organisasi"} · Diselenggarakan oleh panitia PEMIRA
+        {settings?.organization || "Organisasi"} · Diselenggarakan oleh panitia PEMIRA.
+        <p>© 2026 SMP Permata Bunda. All rights reserved.</p>
       </footer>
     </div>
   );
