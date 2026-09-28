@@ -36,7 +36,7 @@ export default function HomePage() {
   return (
     <div className="home">
       <header className="home-nav">
-        <div className="home-nav-brand">{settings?.title || "PEMIRA"}</div>
+        <div className="home-nav-brand">"PEMIRA"</div>
         <nav>
           <Link to="/kandidat">Kandidat</Link>
           <Link to="/pendaftaran-calon">Daftar Calon</Link>
