@@ -9,7 +9,7 @@ export default function HomePage() {
   const [stats, setStats] = useState({ voters: 0, voted: 0 });
 
   useEffect(() => {
-    supabase.from("election_settings").select("*").eq("id", 1).single().then(({ data }) => setSettings(data));
+    supabase.from("election_settings").select("*").eq("id", 1).maybeSingle().then(({ data }) => setSettings(data));
     supabase
       .from("candidates")
       .select("*")

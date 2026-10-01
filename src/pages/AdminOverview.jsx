@@ -23,7 +23,7 @@ export default function AdminOverview() {
           .from("candidate_applications")
           .select("*", { count: "exact", head: true })
           .eq("status", "pending"),
-        supabase.from("election_settings").select("*").eq("id", 1).single(),
+        supabase.from("election_settings").select("*").eq("id", 1).maybeSingle(),
       ]);
 
     setStats({

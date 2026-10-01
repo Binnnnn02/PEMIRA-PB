@@ -29,7 +29,7 @@ export default function ReRegistration() {
   async function loadData() {
     setLoading(true);
     const [{ data: election }, { data: studentRows, error: studentsError }] = await Promise.all([
-      supabase.from("election_settings").select("*").eq("id", 1).single(),
+      supabase.from("election_settings").select("*").eq("id", 1).maybeSingle(),
       supabase.from("student_directory").select("id, class_name, full_name").eq("is_active", true).order("class_name").order("full_name"),
     ]);
 
@@ -116,13 +116,31 @@ export default function ReRegistration() {
             </p>
             <Link to="/" className="btn btn-purple">Kembali ke beranda</Link>
           </div>
+        ) : loading ? (
+          <div style={{ textAlign: "center", color: "var(--color-ink-soft)", padding: "40px 0" }}>
+            Memuat data...
+          </div>
         ) : !registrationOpen ? (
-          <div className="ballot-slip">
-            <div className="banner banner-danger">Pendaftaran ulang sedang ditutup.</div>
-            <p className="field-hint" style={{ textAlign: "left" }}>
-              Pantau pengumuman panitia untuk jadwal daftar ulang.
+          <div className="ballot-slip" style={{ textAlign: "center" }}>
+            <div
+              className="stamp"
+              style={{
+                borderColor: "var(--color-line)",
+                color: "var(--color-ink-soft)",
+                transform: "rotate(0deg)",
+              }}
+            >
+              ?
+            </div>
+            <h2 style={{ fontSize: 20 }}>Pendaftaran Ulang Ditutup</h2>
+            <p style={{ color: "var(--color-ink-soft)", marginTop: 8 }}>
+              Pendaftaran ulang belum dibuka atau sedang ditutup. Pantau pengumuman panitia untuk jadwal daftar ulang.
             </p>
-            <Link to="/" className="btn btn-outline">Kembali</Link>
+            <div style={{ marginTop: 24 }}>
+              <Link to="/" className="btn btn-outline" style={{ width: "auto" }}>
+                Kembali ke Beranda
+              </Link>
+            </div>
           </div>
         ) : (
           <form className="ballot-slip" onSubmit={handleSubmit}>

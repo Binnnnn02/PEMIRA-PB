@@ -12,6 +12,7 @@ function toLocalInputValue(isoString) {
 
 export default function AdminSettings() {
   const [form, setForm] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
@@ -20,8 +21,11 @@ export default function AdminSettings() {
       .from("election_settings")
       .select("*")
       .eq("id", 1)
-      .single()
-      .then(({ data }) => setForm(data));
+      .maybeSingle()
+      .then(({ data }) => {
+        setForm(data || {});
+        setLoading(false);
+      });
   }, []);
 
   function update(key, value) {
@@ -58,7 +62,7 @@ export default function AdminSettings() {
     setSaved(true);
   }
 
-  if (!form) return <div>Memuat…</div>;
+  if (loading) return <div>Memuat…</div>;
 
   return (
     <div>

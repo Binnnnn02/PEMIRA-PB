@@ -1,21 +1,21 @@
 :root {
-  --color-paper: #faf7f0;
-  --color-paper-alt: #f0ead9;
-  --color-ink: #1b2340;
-  --color-ink-soft: #565c74;
-  --color-purple: #4a1942;
-  --color-purple-bright: #6f2f66;
-  --color-purple-wash: #f1e6ef;
-  --color-gold: #9c7a25;
-  --color-line: #d8d0bd;
-  --color-success: #2f6f4e;
-  --color-success-wash: #e5f0e9;
-  --color-danger: #a83a2e;
-  --color-danger-wash: #f7e8e5;
+  --color-paper: #f8fafc;
+  --color-paper-alt: #f1f5f9;
+  --color-ink: #0f172a;
+  --color-ink-soft: #475569;
+  --color-purple: #4f46e5;
+  --color-purple-bright: #6366f1;
+  --color-purple-wash: #e0e7ff;
+  --color-gold: #d97706;
+  --color-line: #e2e8f0;
+  --color-success: #15803d;
+  --color-success-wash: #dcfce7;
+  --color-danger: #b91c1c;
+  --color-danger-wash: #fee2e2;
 
-  --font-display: "Fraunces", serif;
-  --font-body: "IBM Plex Sans", sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
+  --font-display: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "Fira Code", monospace;
 }
 
 * {
@@ -58,6 +58,32 @@ button {
   outline-offset: 2px;
 }
 
+/* ---------- shared motion ---------- */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.step-fade {
+  animation: fadeInUp 0.35s ease;
+}
+
 /* ---------- layout shells ---------- */
 
 .page {
@@ -66,6 +92,7 @@ button {
   flex-direction: column;
   align-items: center;
   padding: 48px 20px 80px;
+  animation: fadeInUp 0.4s ease;
 }
 
 .page-narrow {
@@ -116,6 +143,7 @@ button {
   border-radius: 3px;
   padding: 32px 28px;
   position: relative;
+  animation: fadeInUp 0.35s ease;
 }
 
 .ballot-slip::before {
@@ -146,11 +174,14 @@ button {
   background: var(--color-paper);
   color: var(--color-ink);
   text-transform: uppercase;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
 
 .code-boxes input:focus {
   border-color: var(--color-purple-bright);
   background: #fff;
+  box-shadow: 0 0 0 3px var(--color-purple-wash);
+  transform: translateY(-1px);
 }
 
 .field-hint {
@@ -176,6 +207,7 @@ button {
   background: var(--color-ink);
   color: var(--color-paper);
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.08s ease, opacity 0.15s ease;
   width: 100%;
 }
@@ -228,6 +260,14 @@ button {
   background: #fff;
   cursor: pointer;
   text-align: left;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.candidate-row:hover:not(:disabled) {
+  border-color: var(--color-purple-bright);
+  box-shadow: 0 3px 10px rgba(27, 35, 64, 0.08);
+  transform: translateY(-1px);
 }
 
 .candidate-row.selected {
@@ -277,6 +317,11 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.ink-mark.filled {
+  transform: scale(1.05);
 }
 
 .ink-mark.filled {
@@ -299,6 +344,7 @@ button {
   font-size: 14px;
   margin-top: 18px;
   border: 1px solid transparent;
+  animation: fadeInUp 0.25s ease;
 }
 
 .banner-danger {
@@ -366,18 +412,28 @@ button {
   font-size: 14px;
   padding: 10px 12px;
   border-radius: 4px;
+  border-left: 2px solid transparent;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    padding-left 0.15s ease;
 }
 
-.admin-sidebar nav a.active,
 .admin-sidebar nav a:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
+  padding-left: 16px;
+}
+
+.admin-sidebar nav a.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-left-color: var(--color-purple-bright);
 }
 
 .admin-main {
   flex: 1;
   padding: 36px 40px;
   max-width: 980px;
+  animation: fadeInUp 0.3s ease;
 }
 
 .admin-main h2 {
@@ -397,6 +453,13 @@ button {
   border-radius: 5px;
   padding: 22px;
   margin-bottom: 20px;
+  box-shadow: 0 1px 2px rgba(27, 35, 64, 0.03);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 14px rgba(27, 35, 64, 0.06);
+  border-color: #cfc6ae;
 }
 
 .card h3 {
@@ -432,6 +495,15 @@ button {
   border: 1.5px solid var(--color-line);
   border-radius: 4px;
   background: var(--color-paper);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  border-color: var(--color-purple-bright);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--color-purple-wash);
 }
 
 .form-field textarea {
@@ -452,6 +524,14 @@ td {
   border-bottom: 1px solid var(--color-line);
 }
 
+tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+tbody tr:hover {
+  background: var(--color-paper-alt);
+}
+
 th {
   color: var(--color-ink-soft);
   font-weight: 600;
@@ -467,6 +547,7 @@ th {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .pill-success {
@@ -505,6 +586,12 @@ th {
   border: 1px solid var(--color-line);
   border-radius: 5px;
   padding: 18px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 14px rgba(27, 35, 64, 0.06);
+  transform: translateY(-2px);
 }
 
 .stat-card .value {

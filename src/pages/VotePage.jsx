@@ -17,6 +17,7 @@ const REASON_MESSAGES = {
 
 export default function VotePage() {
   const [settings, setSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [step, setStep] = useState("code"); // code | ballot | submitting | done | closed
   const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(""));
   const [checking, setChecking] = useState(false);
@@ -31,11 +32,14 @@ export default function VotePage() {
       .from("election_settings")
       .select("*")
       .eq("id", 1)
-      .single()
-      .then(({ data }) => setSettings(data));
+      .maybeSingle()
+      .then(({ data }) => {
+        setSettings(data || {});
+        setLoading(false);
+      });
   }, []);
 
-  const windowStatus = getWindowStatus(settings);
+  const windowStatus = getWindowStatus(settings, loading);
 
   function handleDigitChange(index, value) {
     const clean = value.replace(/[^a-zA-Z0-9]/g, "").slice(-1);
@@ -243,9 +247,9 @@ function truncate(text, max) {
   return text.length > max ? `${text.slice(0, max)}…` : text;
 }
 
-function getWindowStatus(settings) {
-  if (!settings) return { type: "loading" };
-  if (!settings.is_active) return { type: "inactive" };
+function getWindowStatus(settings, loading) {
+  if (loading) return { type: "loading" };
+  if (!settings || !settings.is_active) return { type: "inactive" };
   const now = Date.now();
   if (settings.start_time && now < new Date(settings.start_time).getTime()) {
     return { type: "before" };
