@@ -87,6 +87,7 @@ export default function ReRegistration() {
         already_registered: "Siswa ini sudah terdaftar ulang untuk PEMIRA ini.",
         phone_used: "Nomor WhatsApp ini sudah digunakan untuk daftar ulang.",
         invalid_student: "Data siswa tidak valid.",
+        closed: "Pendaftaran ulang sedang ditutup.",
       };
       setError(messages[data?.reason] || "Pendaftaran tidak dapat diproses.");
       return;
@@ -96,7 +97,11 @@ export default function ReRegistration() {
     setSuccess(true);
   }
 
-  const registrationOpen = settings?.registration_open;
+  const now = Date.now();
+  const registrationOpen =
+    !!settings?.reregistration_open &&
+    !(settings.reregistration_start && now < new Date(settings.reregistration_start).getTime()) &&
+    !(settings.reregistration_end && now > new Date(settings.reregistration_end).getTime());
 
   return (
     <div className="page">

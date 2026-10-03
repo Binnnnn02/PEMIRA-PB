@@ -36,7 +36,7 @@ export default function AdminSettings() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    const { error: updateError } = await supabase
+    const { data, error: updateError } = await supabase
       .from("election_settings")
       .update({
         title: form.title,
@@ -52,11 +52,23 @@ export default function AdminSettings() {
           ? new Date(form.registration_end).toISOString()
           : null,
         registration_open: form.registration_open,
+        reregistration_start: form.reregistration_start
+          ? new Date(form.reregistration_start).toISOString()
+          : null,
+        reregistration_end: form.reregistration_end
+          ? new Date(form.reregistration_end).toISOString()
+          : null,
+        reregistration_open: form.reregistration_open,
       })
-      .eq("id", 1);
+      .eq("id", 1)
+      .select();
 
     if (updateError) {
       setError("Gagal menyimpan: " + updateError.message);
+      return;
+    }
+    if (!data || data.length === 0) {
+      setError("Tidak ada data yang tersimpan. Cek baris id=1 dan policy RLS, atau login ulang.");
       return;
     }
     setSaved(true);
@@ -125,6 +137,38 @@ export default function AdminSettings() {
           </label>
         </div>
 
+        <h3 style={{ marginTop: 24 }}>Daftar ulang PEMIRA</h3>
+        <div className="form-grid">
+          <div className="form-field">
+            <label>Mulai daftar ulang</label>
+            <input
+              type="datetime-local"
+              value={toLocalInputValue(form.reregistration_start)}
+              onChange={(e) => update("reregistration_start", e.target.value)}
+            />
+          </div>
+          <div className="form-field">
+            <label>Selesai daftar ulang</label>
+            <input
+              type="datetime-local"
+              value={toLocalInputValue(form.reregistration_end)}
+              onChange={(e) => update("reregistration_end", e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="form-field" style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <input
+            type="checkbox"
+            id="reregistration_open"
+            checked={!!form.reregistration_open}
+            onChange={(e) => update("reregistration_open", e.target.checked)}
+            style={{ width: 18, height: 18 }}
+          />
+          <label htmlFor="reregistration_open" style={{ marginBottom: 0 }}>
+            Buka daftar ulang PEMIRA
+          </label>
+        </div>
+
         <h3 style={{ marginTop: 24 }}>Pemungutan suara</h3>
         <div className="form-grid">
           <div className="form-field">
@@ -160,7 +204,7 @@ export default function AdminSettings() {
 
         <p className="field-hint" style={{ textAlign: "left" }}>
           Selama nonaktif, halaman voting akan menampilkan status "belum dibuka" meski
-          pemilih memasukkan kode yang benar. Aturan yang sama berlaku untuk pendaftaran calon.
+          pemilih memasukkan kode yang benar. Aturan yang sama berlaku untuk pendaftaran calon dan daftar ulang.
         </p>
 
         {error && <div className="banner banner-danger">{error}</div>}

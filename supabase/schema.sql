@@ -20,6 +20,9 @@ create table if not exists election_settings (
   registration_open boolean not null default false,
   registration_start timestamptz,
   registration_end timestamptz,
+  reregistration_open boolean not null default false,
+  reregistration_start timestamptz,
+  reregistration_end timestamptz,
   constraint single_row check (id = 1)
 );
 
@@ -28,6 +31,9 @@ alter table election_settings add column if not exists tagline text;
 alter table election_settings add column if not exists registration_open boolean not null default false;
 alter table election_settings add column if not exists registration_start timestamptz;
 alter table election_settings add column if not exists registration_end timestamptz;
+alter table election_settings add column if not exists reregistration_open boolean not null default false;
+alter table election_settings add column if not exists reregistration_start timestamptz;
+alter table election_settings add column if not exists reregistration_end timestamptz;
 
 insert into election_settings (id, title, organization)
 values (1, 'PEMIRA 2026', 'Nama Organisasi')
@@ -369,7 +375,16 @@ set search_path = public
 as $$
 declare
   normalized_phone text;
+  v_settings election_settings%rowtype;
 begin
+  select * into v_settings from election_settings where id = p_election_id;
+
+  if v_settings.reregistration_open is not true
+     or (v_settings.reregistration_start is not null and now() < v_settings.reregistration_start)
+     or (v_settings.reregistration_end is not null and now() > v_settings.reregistration_end) then
+    return jsonb_build_object('success', false, 'reason', 'closed');
+  end if;
+
   normalized_phone := regexp_replace(p_phone_number, '[^0-9]', '', 'g');
 
   if not exists (

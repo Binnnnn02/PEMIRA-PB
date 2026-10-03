@@ -33,6 +33,12 @@ export default function HomePage() {
     settings?.registration_end
   );
 
+  const reregistrationStatus = getStatus(
+    settings?.reregistration_open,
+    settings?.reregistration_start,
+    settings?.reregistration_end
+  );
+
   return (
     <div className="home">
       <header className="home-nav">
@@ -72,6 +78,7 @@ export default function HomePage() {
 
         <div className="hero-status-row">
           <StatusChip label="Pendaftaran calon" status={registrationStatus} settings={settings} field="registration" />
+          <StatusChip label="Daftar ulang" status={reregistrationStatus} settings={settings} field="reregistration" />
           <StatusChip label="Pemungutan suara" status={votingStatus} settings={settings} field="voting" />
         </div>
       </section>
@@ -170,8 +177,14 @@ function getStatus(active, start, end) {
 }
 
 function StatusChip({ label, status, settings, field }) {
-  const start = field === "voting" ? settings?.start_time : settings?.registration_start;
-  const end = field === "voting" ? settings?.end_time : settings?.registration_end;
+  const fieldMap = {
+    voting: ["start_time", "end_time"],
+    registration: ["registration_start", "registration_end"],
+    reregistration: ["reregistration_start", "reregistration_end"],
+  };
+  const [startKey, endKey] = fieldMap[field];
+  const start = settings?.[startKey];
+  const end = settings?.[endKey];
 
   const text = {
     inactive: "Belum dibuka",
