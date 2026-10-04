@@ -104,7 +104,7 @@ export default function AdminCandidates() {
 
     if (deleteError) {
       const message = deleteError.code === "23503"
-        ? "Kandidat tidak bisa dihapus karena sudah memiliki suara. Hapus hanya kandidat yang belum dipilih, agar hasil PEMIRA tidak rusak."
+        ? "Kandidat tidak bisa dihapus karena sudah memiliki suara."
         : "Gagal menghapus kandidat: " + deleteError.message;
       setError(message);
       return;
@@ -118,8 +118,11 @@ export default function AdminCandidates() {
       <h2>Kandidat</h2>
       <p className="admin-sub">Kelola paslon yang tampil di surat suara.</p>
 
+      {/* Form Card */}
       <div className="card">
-        <h3>{form.id ? "Ubah kandidat" : "Tambah kandidat"}</h3>
+        <h3 style={{ marginBottom: 16 }}>
+          {form.id ? "✏️ Ubah kandidat" : "＋ Tambah kandidat baru"}
+        </h3>
         <form onSubmit={handleSubmit}>
           <div className="form-grid">
             <div className="form-field">
@@ -128,6 +131,7 @@ export default function AdminCandidates() {
                 type="number"
                 value={form.number}
                 onChange={(e) => updateField("number", e.target.value)}
+                min={1}
               />
             </div>
             <div className="form-field">
@@ -145,19 +149,21 @@ export default function AdminCandidates() {
               onChange={(e) => updateField("running_mate", e.target.value)}
             />
           </div>
-          <div className="form-field">
-            <label>Visi</label>
-            <textarea
-              value={form.vision || ""}
-              onChange={(e) => updateField("vision", e.target.value)}
-            />
-          </div>
-          <div className="form-field">
-            <label>Misi</label>
-            <textarea
-              value={form.mission || ""}
-              onChange={(e) => updateField("mission", e.target.value)}
-            />
+          <div className="form-grid">
+            <div className="form-field">
+              <label>Visi</label>
+              <textarea
+                value={form.vision || ""}
+                onChange={(e) => updateField("vision", e.target.value)}
+              />
+            </div>
+            <div className="form-field">
+              <label>Misi</label>
+              <textarea
+                value={form.mission || ""}
+                onChange={(e) => updateField("mission", e.target.value)}
+              />
+            </div>
           </div>
           <div className="form-field">
             <label>Foto</label>
@@ -166,16 +172,16 @@ export default function AdminCandidates() {
               <img
                 src={form.photo_url}
                 alt=""
-                style={{ width: 64, height: 64, objectFit: "cover", borderRadius: 4, marginTop: 6 }}
+                style={{ width: 80, height: 80, objectFit: "cover", borderRadius: "var(--radius-md)", marginTop: 8, border: "1px solid var(--color-border)" }}
               />
             )}
           </div>
 
           {error && <div className="banner banner-danger">{error}</div>}
 
-          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
             <button className="btn btn-purple btn-small" disabled={uploading}>
-              {form.id ? "Simpan perubahan" : "Tambah kandidat"}
+              {uploading ? "Mengunggah…" : form.id ? "Simpan perubahan" : "Tambah kandidat"}
             </button>
             {form.id && (
               <button type="button" className="btn btn-outline btn-small" onClick={resetForm}>
@@ -186,43 +192,95 @@ export default function AdminCandidates() {
         </form>
       </div>
 
+      {/* Candidates Table */}
       <div className="card">
-        <h3>Daftar kandidat ({candidates.length})</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>Nama</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {candidates.map((c) => (
-              <tr key={c.id}>
-                <td>{c.number}</td>
-                <td>
-                  {c.name}
-                  {c.running_mate ? ` & ${c.running_mate}` : ""}
-                </td>
-                <td style={{ display: "flex", gap: 8 }}>
-                  <button className="btn btn-outline btn-small" onClick={() => edit(c)}>
-                    Ubah
-                  </button>
-                  <button className="btn btn-outline btn-small" onClick={() => remove(c.id)}>
-                    Hapus
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {candidates.length === 0 && (
+        <h3 style={{ marginBottom: 0 }}>Daftar kandidat ({candidates.length})</h3>
+        <div style={{ marginTop: 14, overflowX: "auto" }}>
+          <table>
+            <thead>
               <tr>
-                <td colSpan={3} style={{ color: "var(--color-ink-soft)" }}>
-                  Belum ada kandidat.
-                </td>
+                <th style={{ width: 60 }}>No.</th>
+                <th style={{ width: 60 }}>Foto</th>
+                <th>Nama</th>
+                <th style={{ textAlign: "right" }}>Aksi</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {candidates.map((c) => (
+                <tr key={c.id}>
+                  <td>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 30, height: 30,
+                        background: "var(--color-primary-wash)",
+                        color: "var(--color-primary)",
+                        borderRadius: "50%",
+                        fontWeight: 700, fontSize: 14,
+                      }}
+                    >
+                      {c.number}
+                    </span>
+                  </td>
+                  <td>
+                    {c.photo_url ? (
+                      <img
+                        src={c.photo_url}
+                        alt=""
+                        style={{ width: 36, height: 36, objectFit: "cover", borderRadius: "var(--radius-sm)", border: "1px solid var(--color-border)" }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: 36, height: 36, borderRadius: "var(--radius-sm)",
+                          background: "var(--color-surface-alt)", display: "flex",
+                          alignItems: "center", justifyContent: "center",
+                          fontSize: 12, color: "var(--color-ink-muted)",
+                        }}
+                      >
+                        —
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>
+                      {c.name}
+                      {c.running_mate ? ` & ${c.running_mate}` : ""}
+                    </div>
+                    {c.vision && (
+                      <div style={{ fontSize: 12, color: "var(--color-ink-soft)", marginTop: 2 }}>
+                        {c.vision.slice(0, 60)}{c.vision.length > 60 ? "…" : ""}
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                      <button className="btn btn-outline btn-small" onClick={() => edit(c)}>
+                        Ubah
+                      </button>
+                      <button
+                        className="btn btn-danger btn-small"
+                        onClick={() => remove(c.id)}
+                        style={{ fontSize: 12 }}
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {candidates.length === 0 && (
+                <tr>
+                  <td colSpan={4} style={{ textAlign: "center", color: "var(--color-ink-soft)", padding: "24px 0" }}>
+                    Belum ada kandidat.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

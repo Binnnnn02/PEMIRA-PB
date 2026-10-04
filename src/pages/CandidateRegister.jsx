@@ -85,9 +85,7 @@ export default function CandidateRegister() {
   return (
     <div className="page">
       <div className="masthead">
-        <div className="kicker">
-          <Link to="/">← Kembali</Link>
-        </div>
+        <div className="kicker">Pendaftaran Calon</div>
         <h1>Daftar sebagai Calon Pengurus</h1>
         <div className="org">{settings?.organization || ""}</div>
       </div>
@@ -101,6 +99,11 @@ export default function CandidateRegister() {
               Terima kasih, {form.full_name}. Panitia akan memverifikasi pendaftaranmu.
               Jika lolos, namamu akan muncul di halaman kandidat dengan nomor urut resmi.
             </p>
+            <div style={{ marginTop: 20 }}>
+              <Link to="/" className="btn btn-outline">
+                Kembali ke Beranda
+              </Link>
+            </div>
           </div>
         ) : status === "loading" ? (
           <div style={{ textAlign: "center", color: "var(--color-ink-soft)", padding: "40px 0" }}>
@@ -131,7 +134,7 @@ export default function CandidateRegister() {
                 "Pendaftaran calon pengurus telah ditutup. Terima kasih atas partisipasinya."}
             </p>
             <div style={{ marginTop: 24 }}>
-              <Link to="/" className="btn btn-outline" style={{ width: "auto" }}>
+              <Link to="/" className="btn btn-outline">
                 Kembali ke Beranda
               </Link>
             </div>
@@ -176,10 +179,13 @@ export default function CandidateRegister() {
 
             {error && <div className="banner banner-danger">{error}</div>}
 
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
               <button className="btn btn-purple" disabled={submitting || uploading}>
                 {submitting ? "Mengirim…" : "Kirim pendaftaran"}
               </button>
+              <Link to="/" className="btn btn-outline">
+                Kembali ke Beranda
+              </Link>
             </div>
           </form>
         )}

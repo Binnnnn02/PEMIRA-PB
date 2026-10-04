@@ -120,9 +120,7 @@ export default function VotePage() {
   return (
     <div className="page">
       <div className="masthead">
-        <div className="kicker">
-          {step === "code" ? <Link to="/">← Kembali</Link> : "Bilik Suara Digital"}
-        </div>
+        <div className="kicker">Bilik Suara Digital</div>
         <h1>{settings?.title || "PEMIRA"}</h1>
         <div className="org">{settings?.organization || ""}</div>
       </div>
@@ -166,7 +164,7 @@ export default function VotePage() {
 
             {error && <div className="banner banner-danger">{error}</div>}
 
-            <div style={{ marginTop: 20 }}>
+            <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
               <button
                 className="btn btn-purple"
                 onClick={submitCode}
@@ -174,6 +172,9 @@ export default function VotePage() {
               >
                 {checking ? "Memeriksa…" : "Lanjutkan"}
               </button>
+              <Link to="/" className="btn btn-outline">
+                Kembali ke Beranda
+              </Link>
             </div>
           </div>
         )}
@@ -235,6 +236,11 @@ export default function VotePage() {
               Terima kasih sudah berpartisipasi dalam {settings?.title || "PEMIRA"}.
               Kode suara kamu tidak dapat digunakan lagi.
             </p>
+            <div style={{ marginTop: 20 }}>
+              <Link to="/" className="btn btn-outline">
+                Kembali ke Beranda
+              </Link>
+            </div>
           </div>
         )}
       </div>

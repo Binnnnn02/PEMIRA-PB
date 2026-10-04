@@ -16,15 +16,13 @@ export default function CandidatesShowcase() {
   return (
     <div className="page">
       <div className="masthead">
-        <div className="kicker">
-          <Link to="/">← Kembali</Link>
-        </div>
+        <div className="kicker">Paslon PEMIRA</div>
         <h1>Profil Calon Pengurus</h1>
       </div>
 
       <div style={{ width: "100%", maxWidth: 720 }}>
         {candidates.length === 0 && (
-          <p style={{ textAlign: "center", color: "var(--color-ink-soft)" }}>
+          <p style={{ textAlign: "center", color: "var(--color-ink-soft)", padding: "40px 0" }}>
             Belum ada kandidat yang ditetapkan.
           </p>
         )}
@@ -58,6 +56,12 @@ export default function CandidatesShowcase() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div style={{ marginTop: 24, textAlign: "center" }}>
+          <Link to="/" className="btn btn-outline">
+            Kembali ke Beranda
+          </Link>
         </div>
       </div>
     </div>

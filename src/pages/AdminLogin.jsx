@@ -27,39 +27,94 @@ export default function AdminLogin() {
 
   return (
     <div className="page">
-      <div className="masthead">
-        <div className="kicker">Panitia PEMIRA</div>
-        <h1>Masuk Admin</h1>
-      </div>
-      <div className="page-narrow">
-        <form className="ballot-slip" onSubmit={handleSubmit}>
+      <div style={{ width: "100%", maxWidth: 400 }}>
+        {/* Logo / Brand */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 52,
+              height: 52,
+              borderRadius: 14,
+              background: "var(--color-primary)",
+              color: "#fff",
+              fontSize: 22,
+              fontWeight: 700,
+              marginBottom: 16,
+            }}
+          >
+            P
+          </div>
+          <h1 style={{ fontSize: 22, letterSpacing: "-.02em", marginBottom: 4 }}>
+            Masuk Admin
+          </h1>
+          <p style={{ fontSize: 14, color: "var(--color-ink-soft)" }}>
+            Portal Panitia PEMIRA
+          </p>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-lg)",
+            padding: "28px 24px",
+            boxShadow: "var(--shadow-sm)",
+          }}
+        >
           <div className="form-field">
-            <label>Email</label>
+            <label htmlFor="email">Email</label>
             <input
+              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@sekolah.id"
               required
+              autoFocus
             />
           </div>
           <div className="form-field">
-            <label>Kata sandi</label>
+            <label htmlFor="password">Kata sandi</label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
               required
             />
           </div>
-          {error && <div className="banner banner-danger">{error}</div>}
-          <div style={{ marginTop: 12 }}>
-            <button className="btn btn-purple" disabled={loading}>
-              {loading ? "Memproses…" : "Masuk"}
-            </button>
-          </div>
+
+          {error && (
+            <div className="banner banner-danger" style={{ marginTop: 0, marginBottom: 14 }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            className="btn btn-purple"
+            disabled={loading}
+            style={{ marginTop: 8 }}
+          >
+            {loading ? "Memproses…" : "Masuk ke Panel Admin"}
+          </button>
         </form>
-        <p className="field-hint" style={{ marginTop: 16 }}>
-          Akun admin dibuat oleh panitia melalui dashboard Supabase
+
+        <p
+          style={{
+            textAlign: "center",
+            marginTop: 16,
+            fontSize: 12.5,
+            color: "var(--color-ink-muted)",
+            lineHeight: 1.6,
+          }}
+        >
+          Akun admin dibuat melalui Supabase Dashboard
+          <br />
           (Authentication → Users), bukan lewat halaman ini.
         </p>
       </div>

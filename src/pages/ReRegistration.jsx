@@ -106,20 +106,20 @@ export default function ReRegistration() {
   return (
     <div className="page">
       <div className="masthead">
-        <div className="kicker"><Link to="/">← Kembali ke beranda</Link></div>
+        <div className="kicker">Daftar Ulang</div>
         <h1>Daftar Ulang PEMIRA</h1>
         <p className="org">{settings?.title || "PEMIRA"}</p>
       </div>
 
       <div className="page-narrow">
         {success ? (
-          <div className="ballot-slip">
+          <div className="ballot-slip" style={{ textAlign: "center" }}>
             <div className="banner banner-success">Daftar ulang berhasil dikirim.</div>
-            <h3>Data kamu sudah tercatat</h3>
-            <p className="field-hint" style={{ textAlign: "left" }}>
+            <h3 style={{ marginTop: 12 }}>Data kamu sudah tercatat</h3>
+            <p className="field-hint" style={{ textAlign: "center", marginBottom: 20 }}>
               Panitia akan mengirimkan nama, NIS, dan token melalui WhatsApp sesuai jadwal. Jangan membagikan token kepada orang lain.
             </p>
-            <Link to="/" className="btn btn-purple">Kembali ke beranda</Link>
+            <Link to="/" className="btn btn-purple">Kembali ke Beranda</Link>
           </div>
         ) : loading ? (
           <div style={{ textAlign: "center", color: "var(--color-ink-soft)", padding: "40px 0" }}>
@@ -142,7 +142,7 @@ export default function ReRegistration() {
               Pendaftaran ulang belum dibuka atau sedang ditutup. Pantau pengumuman panitia untuk jadwal daftar ulang.
             </p>
             <div style={{ marginTop: 24 }}>
-              <Link to="/" className="btn btn-outline" style={{ width: "auto" }}>
+              <Link to="/" className="btn btn-outline">
                 Kembali ke Beranda
               </Link>
             </div>
@@ -176,7 +176,13 @@ export default function ReRegistration() {
             </div>
 
             {error && <div className="banner banner-danger">{error}</div>}
-            <button className="btn btn-purple" disabled={submitting || loading}>{submitting ? "Mengirim…" : "Kirim Daftar Ulang"}</button>
+
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+              <button className="btn btn-purple" disabled={submitting || loading}>{submitting ? "Mengirim…" : "Kirim Daftar Ulang"}</button>
+              <Link to="/" className="btn btn-outline">
+                Kembali ke Beranda
+              </Link>
+            </div>
           </form>
         )}
       </div>

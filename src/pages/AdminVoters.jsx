@@ -106,105 +106,134 @@ export default function AdminVoters() {
   });
 
   const votedCount = voters.filter((v) => v.has_voted).length;
+  const unvotedCount = voters.length - votedCount;
 
   return (
     <div>
       <h2>Pemilih</h2>
       <p className="admin-sub">
-        {voters.length} pemilih terdaftar · {votedCount} sudah memilih
+        {voters.length} pemilih · {votedCount} sudah memilih · {unvotedCount} belum
       </p>
 
-      <div className="card">
-        <h3>Tambah satu pemilih</h3>
-        <form onSubmit={addOne} style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-          <div className="form-field" style={{ flex: 1, marginBottom: 0 }}>
-            <label>Nama (opsional)</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-          <button className="btn btn-purple btn-small" disabled={busy}>
-            Tambah &amp; buat kode
-          </button>
-        </form>
-      </div>
-
-      <div className="card">
-        <h3>Buat kode massal</h3>
-        <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-          <div className="form-field" style={{ marginBottom: 0 }}>
-            <label>Jumlah kode</label>
-            <input
-              type="number"
-              value={bulkCount}
-              onChange={(e) => setBulkCount(e.target.value)}
-              style={{ width: 100 }}
-            />
-          </div>
-          <button className="btn btn-purple btn-small" onClick={addBulk} disabled={busy}>
-            Buat kode
-          </button>
+      {/* Action Cards Row */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
+        <div className="card">
+          <h3>Tambah satu pemilih</h3>
+          <form onSubmit={addOne} style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+            <div className="form-field" style={{ flex: 1, marginBottom: 0 }}>
+              <label>Nama (opsional)</label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Nama siswa"
+              />
+            </div>
+            <button className="btn btn-purple btn-small" disabled={busy}>
+              {busy ? "…" : "Tambah & buat kode"}
+            </button>
+          </form>
         </div>
-        <p className="field-hint" style={{ textAlign: "left", marginTop: 10 }}>
-          Kode dibuat tanpa nama — cocok untuk pemilih anonim. Unduh CSV di bawah untuk membagikan kode.
-        </p>
+
+        <div className="card">
+          <h3>Buat kode massal</h3>
+          <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+            <div className="form-field" style={{ marginBottom: 0 }}>
+              <label>Jumlah kode</label>
+              <input
+                type="number"
+                value={bulkCount}
+                onChange={(e) => setBulkCount(e.target.value)}
+                style={{ width: 100 }}
+                min={1} max={500}
+              />
+            </div>
+            <button className="btn btn-purple btn-small" onClick={addBulk} disabled={busy}>
+              {busy ? "…" : "Buat kode"}
+            </button>
+          </div>
+          <p style={{ fontSize: 12.5, color: "var(--color-ink-soft)", marginTop: 8, marginBottom: 0 }}>
+            Kode tanpa nama — untuk pemilih anonim. Unduh CSV untuk distribusi.
+          </p>
+        </div>
       </div>
 
-      {error && <div className="banner banner-danger">{error}</div>}
+      {error && <div className="banner banner-danger" style={{ marginBottom: 14 }}>{error}</div>}
 
+      {/* Table */}
       <div className="card">
         <div className="toolbar">
-          <h3 style={{ marginBottom: 0 }}>Daftar pemilih</h3>
-          <div style={{ display: "flex", gap: 10 }}>
+          <h3 style={{ marginBottom: 0 }}>
+            Daftar pemilih
+            <span style={{ fontSize: 13, fontWeight: 400, color: "var(--color-ink-soft)", marginLeft: 8 }}>
+              ({filtered.length}{search ? ` dari ${voters.length}` : ""})
+            </span>
+          </h3>
+          <div style={{ display: "flex", gap: 8 }}>
             <input
+              className="search-input"
               placeholder="Cari nama atau kode…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{
-                padding: "8px 10px",
-                border: "1.5px solid var(--color-line)",
-                borderRadius: 4,
-                fontSize: 13,
-              }}
+              style={{ width: 200 }}
             />
             <button className="btn btn-outline btn-small" onClick={downloadCsv}>
-              Unduh CSV
+              ↓ Unduh CSV
             </button>
           </div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Kode</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((v) => (
-              <tr key={v.id}>
-                <td>{v.name || <span style={{ color: "var(--color-ink-soft)" }}>—</span>}</td>
-                <td style={{ fontFamily: "var(--font-mono)" }}>{v.code}</td>
-                <td>
-                  <span className={`pill ${v.has_voted ? "pill-success" : "pill-muted"}`}>
-                    {v.has_voted ? "Sudah memilih" : "Belum memilih"}
-                  </span>
-                </td>
-                <td>
-                  <button className="btn btn-outline btn-small" onClick={() => remove(v.id)}>
-                    Hapus
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
+
+        <div style={{ overflowX: "auto" }}>
+          <table>
+            <thead>
               <tr>
-                <td colSpan={4} style={{ color: "var(--color-ink-soft)" }}>
-                  Tidak ada data.
-                </td>
+                <th>Nama</th>
+                <th>Kode</th>
+                <th>Status</th>
+                <th style={{ textAlign: "right" }}>Aksi</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map((v) => (
+                <tr key={v.id}>
+                  <td>
+                    {v.name || <span style={{ color: "var(--color-ink-muted)" }}>—</span>}
+                  </td>
+                  <td>
+                    <code
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 13,
+                        background: "var(--color-surface-alt)",
+                        padding: "3px 8px",
+                        borderRadius: "var(--radius-sm)",
+                        letterSpacing: ".08em",
+                      }}
+                    >
+                      {v.code}
+                    </code>
+                  </td>
+                  <td>
+                    <span className={`pill ${v.has_voted ? "pill-success" : "pill-muted"}`}>
+                      {v.has_voted ? "✓ Sudah memilih" : "Belum memilih"}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    <button className="btn btn-danger btn-small" onClick={() => remove(v.id)}>
+                      Hapus
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={4} style={{ textAlign: "center", color: "var(--color-ink-soft)", padding: "24px 0" }}>
+                    Tidak ada data.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -36,24 +36,31 @@ export default function AdminOverview() {
   }
 
   const turnout = stats.voters > 0 ? Math.round((stats.voted / stats.voters) * 100) : 0;
+  const isActive = settings?.is_active;
 
   return (
     <div>
       <h2>Ringkasan</h2>
       <p className="admin-sub">
-        {settings?.title} — {settings?.organization}
+        {settings?.title
+          ? `${settings.title} — ${settings.organization}`
+          : "Memuat data pemilu…"}
       </p>
 
+      {/* Stat Cards */}
       <div className="stat-grid">
         <div className="stat-card">
           <div className="value">{stats.voters}</div>
-          <div className="label">Total pemilih terdaftar</div>
+          <div className="label">Pemilih terdaftar</div>
         </div>
         <div className="stat-card">
           <div className="value">
-            {stats.voted} <span style={{ fontSize: 16, color: "var(--color-ink-soft)" }}>({turnout}%)</span>
+            {stats.voted}
+            <span style={{ fontSize: 15, fontWeight: 400, color: "var(--color-ink-soft)", marginLeft: 6 }}>
+              ({turnout}%)
+            </span>
           </div>
-          <div className="label">Sudah memilih</div>
+          <div className="label">Suara masuk</div>
         </div>
         <div className="stat-card">
           <div className="value">{stats.candidates}</div>
@@ -61,22 +68,47 @@ export default function AdminOverview() {
         </div>
       </div>
 
+      {/* Pending alert */}
       {stats.pending > 0 && (
-        <div className="card" style={{ borderColor: "var(--color-purple)" }}>
-          <h3>{stats.pending} pendaftaran calon menunggu verifikasi</h3>
-          <p style={{ fontSize: 14, color: "var(--color-ink-soft)", marginBottom: 12 }}>
-            Tinjau dan setujui pendaftar agar muncul di surat suara.
-          </p>
-          <Link to="/admin/applications" className="btn btn-purple btn-small">
-            Tinjau pendaftaran
-          </Link>
+        <div
+          className="card"
+          style={{ borderColor: "var(--color-primary)", borderLeftWidth: 3, borderLeftStyle: "solid" }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+            <div>
+              <h3 style={{ marginBottom: 4 }}>
+                {stats.pending} pendaftaran menunggu verifikasi
+              </h3>
+              <p style={{ fontSize: 13, color: "var(--color-ink-soft)", margin: 0 }}>
+                Tinjau dan setujui pendaftar agar muncul di surat suara.
+              </p>
+            </div>
+            <Link to="/admin/applications" className="btn btn-purple btn-small" style={{ flexShrink: 0 }}>
+              Tinjau →
+            </Link>
+          </div>
         </div>
       )}
 
+      {/* Voting status */}
       <div className="card">
-        <h3>Status pemungutan suara</h3>
-        <p style={{ fontSize: 14, color: "var(--color-ink-soft)" }}>
-          {settings?.is_active
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+          <span
+            style={{
+              width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
+              background: isActive ? "var(--color-success)" : "var(--color-ink-muted)",
+              boxShadow: isActive ? "0 0 0 3px var(--color-success-wash)" : "none",
+            }}
+          />
+          <h3 style={{ marginBottom: 0 }}>
+            Status pemungutan suara:{" "}
+            <span style={{ color: isActive ? "var(--color-success)" : "var(--color-ink-soft)" }}>
+              {isActive ? "Aktif" : "Nonaktif"}
+            </span>
+          </h3>
+        </div>
+        <p style={{ fontSize: 13.5, color: "var(--color-ink-soft)", margin: 0 }}>
+          {isActive
             ? "Pemungutan suara sedang aktif. Atur jadwal di halaman Pengaturan."
             : "Pemungutan suara belum diaktifkan. Buka di halaman Pengaturan ketika siap."}
         </p>

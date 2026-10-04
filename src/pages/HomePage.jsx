@@ -33,16 +33,11 @@ export default function HomePage() {
     settings?.registration_end
   );
 
-  const reregistrationStatus = getStatus(
-    settings?.reregistration_open,
-    settings?.reregistration_start,
-    settings?.reregistration_end
-  );
-
   return (
     <div className="home">
+      {/* Navigation */}
       <header className="home-nav">
-        <div className="home-nav-brand">{settings?.title || "Portal Pemira"}</div>
+        <div className="home-nav-brand">Portal Pemira</div>
         <nav>
           <Link to="/kandidat">Kandidat</Link>
           <Link to="/pendaftaran-calon">Daftar Calon</Link>
@@ -53,11 +48,14 @@ export default function HomePage() {
         </nav>
       </header>
 
+      {/* Hero */}
       <section className="hero">
         <div className="hero-kicker">{settings?.organization || "Organisasi"}</div>
         <h1 className="hero-title">
           {settings?.title || "PEMIRA"}
-          {settings?.tagline ? <span className="hero-tagline">{settings.tagline}</span> : null}
+          {settings?.tagline && (
+            <span className="hero-tagline">{settings.tagline}</span>
+          )}
         </h1>
         <p className="hero-lede">
           Satu suara, satu ketukan. Daftarkan dirimu sebagai calon pengurus, atau gunakan
@@ -78,11 +76,11 @@ export default function HomePage() {
 
         <div className="hero-status-row">
           <StatusChip label="Pendaftaran calon" status={registrationStatus} settings={settings} field="registration" />
-          <StatusChip label="Daftar ulang" status={reregistrationStatus} settings={settings} field="reregistration" />
           <StatusChip label="Pemungutan suara" status={votingStatus} settings={settings} field="voting" />
         </div>
       </section>
 
+      {/* Stats Strip */}
       {stats.voters > 0 && (
         <section className="stat-strip">
           <div>
@@ -100,6 +98,7 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* Candidate Preview */}
       {candidates.length > 0 && (
         <section className="section">
           <div className="section-head">
@@ -125,7 +124,8 @@ export default function HomePage() {
         </section>
       )}
 
-      <section className="section">
+      {/* Steps */}
+      <section className="section" style={{ borderTop: "1px solid var(--color-border)" }}>
         <div className="section-head">
           <h2>Bagaimana alurnya</h2>
         </div>
@@ -160,9 +160,10 @@ export default function HomePage() {
         </ol>
       </section>
 
+      {/* Footer */}
       <footer className="home-footer">
-        {settings?.organization || "Organisasi"} · Diselenggarakan oleh panitia PEMIRA.
-        <p>© 2026 SMP Permata Bunda. All rights reserved.</p>
+        <div>{settings?.organization || "Organisasi"} · Diselenggarakan oleh panitia PEMIRA.</div>
+        <div style={{ marginTop: 4 }}>© {new Date().getFullYear()} SMP Permata Bunda. All rights reserved.</div>
       </footer>
     </div>
   );
@@ -177,20 +178,13 @@ function getStatus(active, start, end) {
 }
 
 function StatusChip({ label, status, settings, field }) {
-  const fieldMap = {
-    voting: ["start_time", "end_time"],
-    registration: ["registration_start", "registration_end"],
-    reregistration: ["reregistration_start", "reregistration_end"],
-  };
-  const [startKey, endKey] = fieldMap[field];
-  const start = settings?.[startKey];
-  const end = settings?.[endKey];
+  const start = field === "voting" ? settings?.start_time : settings?.registration_start;
 
   const text = {
     inactive: "Belum dibuka",
-    before: "Segera dibuka",
-    open: "Sedang dibuka",
-    after: "Sudah ditutup",
+    before:   "Segera dibuka",
+    open:     "Sedang dibuka",
+    after:    "Sudah ditutup",
   }[status];
 
   return (
@@ -200,8 +194,7 @@ function StatusChip({ label, status, settings, field }) {
         {label}: <strong>{text}</strong>
         {status === "before" && start && (
           <>
-            {" "}
-            · <Countdown target={start} />
+            {" "}· <Countdown target={start} />
           </>
         )}
       </span>
