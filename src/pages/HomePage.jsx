@@ -7,6 +7,7 @@ export default function HomePage() {
   const [settings, setSettings] = useState(null);
   const [candidates, setCandidates] = useState([]);
   const [stats, setStats] = useState({ voters: 0, voted: 0 });
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.from("election_settings").select("*").eq("id", 1).maybeSingle().then(({ data }) => setSettings(data));
@@ -37,12 +38,21 @@ export default function HomePage() {
     <div className="home">
       {/* Navigation */}
       <header className="home-nav">
-        <div className="home-nav-brand">Portal Pemira</div>
-        <nav>
-          <Link to="/kandidat">Kandidat</Link>
-          <Link to="/pendaftaran-calon">Daftar Calon</Link>
-          <Link to="/daftar-ulang">Daftar Ulang</Link>
-          <Link to="/pilih" className="home-nav-cta">
+        <Link to="/" className="home-nav-brand">Portal Pemira</Link>
+
+        <button
+          className="home-nav-toggle"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle Navigation Menu"
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+
+        <nav className={menuOpen ? "open" : ""}>
+          <Link to="/kandidat" onClick={() => setMenuOpen(false)}>Kandidat</Link>
+          <Link to="/pendaftaran-calon" onClick={() => setMenuOpen(false)}>Daftar Calon</Link>
+          <Link to="/daftar-ulang" onClick={() => setMenuOpen(false)}>Daftar Ulang</Link>
+          <Link to="/pilih" className="home-nav-cta" onClick={() => setMenuOpen(false)}>
             Masuk Memilih
           </Link>
         </nav>
