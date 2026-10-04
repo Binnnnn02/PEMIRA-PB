@@ -141,6 +141,9 @@ export default function AdminSettings() {
       setError("Tidak ada data yang tersimpan. Cek baris id=1 dan policy RLS, atau login ulang.");
       return;
     }
+    try {
+      sessionStorage.setItem("pemira_settings_cache", JSON.stringify(data[0]));
+    } catch {}
     setSaved(true);
   }
 

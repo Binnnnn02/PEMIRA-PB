@@ -12,9 +12,19 @@ const emptyForm = {
   photo_url: "",
 };
 
+function getInitialSettings() {
+  try {
+    const cached = sessionStorage.getItem("pemira_settings_cache");
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function CandidateRegister() {
-  const [settings, setSettings] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const initialSettings = getInitialSettings();
+  const [settings, setSettings] = useState(initialSettings);
+  const [loading, setLoading] = useState(!initialSettings);
   const [form, setForm] = useState(emptyForm);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -23,7 +33,10 @@ export default function CandidateRegister() {
 
   useEffect(() => {
     supabase.from("election_settings").select("*").eq("id", 1).maybeSingle().then(({ data }) => {
-      setSettings(data || {}); 
+      if (data) {
+        setSettings(data);
+        try { sessionStorage.setItem("pemira_settings_cache", JSON.stringify(data)); } catch {}
+      }
       setLoading(false);
     });
   }, []);

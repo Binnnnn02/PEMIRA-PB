@@ -3,14 +3,30 @@ import { Link } from "react-router-dom";
 import { supabase } from "../supabaseClient.js";
 import Countdown from "../components/Countdown.jsx";
 
+function getInitialSettings() {
+  try {
+    const cached = sessionStorage.getItem("pemira_settings_cache");
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function HomePage() {
-  const [settings, setSettings] = useState(null);
+  const [settings, setSettings] = useState(getInitialSettings);
   const [candidates, setCandidates] = useState([]);
   const [stats, setStats] = useState({ voters: 0, voted: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    supabase.from("election_settings").select("*").eq("id", 1).maybeSingle().then(({ data }) => setSettings(data));
+    supabase.from("election_settings").select("*").eq("id", 1).maybeSingle().then(({ data }) => {
+      if (data) {
+        setSettings(data);
+        try {
+          sessionStorage.setItem("pemira_settings_cache", JSON.stringify(data));
+        } catch {}
+      }
+    });
     supabase
       .from("candidates")
       .select("*")

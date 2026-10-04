@@ -11,13 +11,23 @@ function normalizePhone(value) {
   return digits;
 }
 
+function getInitialSettings() {
+  try {
+    const cached = sessionStorage.getItem("pemira_settings_cache");
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function ReRegistration() {
-  const [settings, setSettings] = useState(null);
+  const initialSettings = getInitialSettings();
+  const [settings, setSettings] = useState(initialSettings);
   const [students, setStudents] = useState([]);
   const [className, setClassName] = useState("");
   const [studentId, setStudentId] = useState("");
   const [phone, setPhone] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialSettings);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -27,13 +37,16 @@ export default function ReRegistration() {
   }, []);
 
   async function loadData() {
-    setLoading(true);
+    if (!initialSettings) setLoading(true);
     const [{ data: election }, { data: studentRows, error: studentsError }] = await Promise.all([
       supabase.from("election_settings").select("*").eq("id", 1).maybeSingle(),
       supabase.from("student_directory").select("id, class_name, full_name").eq("is_active", true).order("class_name").order("full_name"),
     ]);
 
-    setSettings(election);
+    if (election) {
+      setSettings(election);
+      try { sessionStorage.setItem("pemira_settings_cache", JSON.stringify(election)); } catch {}
+    }
     setStudents(studentRows || []);
     if (studentsError) setError("Data siswa belum tersedia. Hubungi panitia.");
     setLoading(false);

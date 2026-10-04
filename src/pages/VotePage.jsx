@@ -15,9 +15,19 @@ const REASON_MESSAGES = {
   ended: "Waktu pemungutan suara sudah berakhir.",
 };
 
+function getInitialSettings() {
+  try {
+    const cached = sessionStorage.getItem("pemira_settings_cache");
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function VotePage() {
-  const [settings, setSettings] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const initialSettings = getInitialSettings();
+  const [settings, setSettings] = useState(initialSettings);
+  const [loading, setLoading] = useState(!initialSettings);
   const [step, setStep] = useState("code"); // code | ballot | submitting | done | closed
   const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(""));
   const [checking, setChecking] = useState(false);
@@ -34,7 +44,10 @@ export default function VotePage() {
       .eq("id", 1)
       .maybeSingle()
       .then(({ data }) => {
-        setSettings(data || {});
+        if (data) {
+          setSettings(data);
+          try { sessionStorage.setItem("pemira_settings_cache", JSON.stringify(data)); } catch {}
+        }
         setLoading(false);
       });
   }, []);
