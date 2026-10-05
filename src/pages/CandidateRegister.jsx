@@ -384,6 +384,34 @@ export default function CandidateRegister() {
             </div>
 
             <div className="form-field">
+              <label>Template CV</label>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 14px",
+                  background: "var(--color-surface-alt)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-md)",
+                }}
+              >
+                <span style={{ flex: "1 1 220px", fontSize: 13, color: "var(--color-ink-soft)" }}>
+                  Belum punya CV? Unduh templatenya, isi sesuai data diri, lalu simpan sebagai PDF
+                  sebelum diunggah di kolom bawah.
+                </span>
+                <a
+                  href="/template-cv.docx"
+                  download="Template CV.docx"
+                  className="btn btn-outline btn-small"
+                >
+                  ⬇ Unduh Template CV
+                </a>
+              </div>
+            </div>
+
+            <div className="form-field">
               <label>Upload CV dalam Bentuk PDF</label>
               <input
                 type="file"
