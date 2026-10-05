@@ -205,13 +205,14 @@ export default function AdminApplications() {
                 </div>
                 <div style={{ fontSize: 13, color: "var(--color-ink-soft)" }}>
                   {app.class_or_id || "—"}
+                  {app.position ? ` · ${app.position}` : ""}
                   {app.contact ? ` · ${app.contact}` : ""}
                 </div>
               </div>
             </div>
 
-            {/* Vision / Mission */}
-            {(app.vision || app.mission) && (
+            {/* Motto / Motivasi / Visi / Misi */}
+            {(app.motto || app.motivation || app.vision || app.mission) && (
               <div
                 style={{
                   marginTop: 14,
@@ -223,6 +224,16 @@ export default function AdminApplications() {
                   gap: 8,
                 }}
               >
+                {app.motto && (
+                  <p style={{ fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+                    <strong>Motto Hidup:</strong> {app.motto}
+                  </p>
+                )}
+                {app.motivation && (
+                  <p style={{ fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+                    <strong>Motivasi/Tujuan Mendaftar:</strong> {app.motivation}
+                  </p>
+                )}
                 {app.vision && (
                   <p style={{ fontSize: 13, margin: 0, lineHeight: 1.6 }}>
                     <strong>Visi:</strong> {app.vision}
@@ -234,6 +245,19 @@ export default function AdminApplications() {
                   </p>
                 )}
               </div>
+            )}
+
+            {app.cv_url && (
+              <p style={{ fontSize: 13, margin: "10px 0 0" }}>
+                <a
+                  href={app.cv_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ fontWeight: 600, color: "var(--color-primary)" }}
+                >
+                  Lihat CV (PDF)
+                </a>
+              </p>
             )}
 
             {app.admin_note && (

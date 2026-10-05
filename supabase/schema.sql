@@ -66,11 +66,20 @@ create table if not exists candidate_applications (
   mission text,
   photo_url text,
   contact text,
+  motto text,
+  motivation text,
+  cv_url text,
   status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
   admin_note text,
   created_at timestamptz not null default now(),
   reviewed_at timestamptz
 );
+
+-- Migrasi untuk database yang sudah terpasang: formulir pendaftaran memakai
+-- motto hidup, motivasi/tujuan mendaftar, dan tautan CV. Aman dijalankan berulang.
+alter table candidate_applications add column if not exists motto text;
+alter table candidate_applications add column if not exists motivation text;
+alter table candidate_applications add column if not exists cv_url text;
 
 alter table candidate_applications enable row level security;
 
