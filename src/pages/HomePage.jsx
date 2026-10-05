@@ -188,7 +188,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="home-footer">
-        <div>{settings?.organization || "Organisasi"} · Diselenggarakan oleh panitia PEMIRA.</div>
+        <div>{settings?.organization || "Organisasi"} · Diselenggarakan oleh Pengurus 2025/2026 dan DPK.</div>
         <div style={{ marginTop: 4 }}>© {new Date().getFullYear()} SMP Permata Bunda. All rights reserved.</div>
       </footer>
     </div>
