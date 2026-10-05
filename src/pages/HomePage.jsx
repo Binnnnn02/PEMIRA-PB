@@ -159,7 +159,7 @@ export default function HomePage() {
           <li>
             <span className="steps-mark">1</span>
             <div>
-              <strong>Pendaftaran calon dibuka.</strong> Siswa yang ingin maju mengisi formulir
+              <strong>Pendaftaran calon.</strong> Siswa yang ingin maju mengisi formulir
               pendaftaran dan menunggu verifikasi panitia.
             </div>
           </li>
