@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import HomePage from "./pages/HomePage.jsx";
 import VotePage from "./pages/VotePage.jsx";
 import ReRegistration from "./pages/ReRegistration.jsx";
@@ -17,7 +18,8 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/pilih" element={<VotePage />} />
       <Route path="/daftar-ulang" element={<ReRegistration />} />
@@ -44,6 +46,8 @@ export default function App() {
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+      <Analytics />
+    </>
   );
 }
