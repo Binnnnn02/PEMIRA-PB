@@ -383,63 +383,6 @@ export default function CandidateRegister() {
               )}
             </div>
 
-            <div className="form-field">
-              <label>Template CV</label>
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  gap: 12,
-                  padding: "12px 14px",
-                  background: "var(--color-surface-alt)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "var(--radius-md)",
-                }}
-              >
-                <span style={{ flex: "1 1 220px", fontSize: 13, color: "var(--color-ink-soft)" }}>
-                  Belum punya CV? Unduh templatenya, isi sesuai data diri, lalu simpan sebagai PDF
-                  sebelum diunggah di kolom bawah.
-                </span>
-                <a
-                  href="/template-cv.docx"
-                  download="Template CV.docx"
-                  className="btn btn-outline btn-small"
-                >
-                  ⬇ Unduh Template CV
-                </a>
-              </div>
-            </div>
-
-            <div className="form-field">
-              <label>Upload CV dalam Bentuk PDF</label>
-              <input
-                type="file"
-                accept="application/pdf,.pdf"
-                onChange={handleCvUpload}
-                required={!form.cv_url}
-              />
-              <div className="field-hint">
-                {uploadingCv ? "Mengunggah CV…" : "Berkas PDF (satu berkas)."}
-              </div>
-              {form.cv_url && (
-                <a
-                  href={form.cv_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: "inline-block",
-                    marginTop: 6,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "var(--color-primary)",
-                  }}
-                >
-                  ✓ CV terunggah — lihat berkas
-                </a>
-              )}
-            </div>
-
             {error && <div className="banner banner-danger">{error}</div>}
 
             <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
