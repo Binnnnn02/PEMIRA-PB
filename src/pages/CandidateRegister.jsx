@@ -20,7 +20,6 @@ const emptyForm = {
   mission: "",
   contact: "",
   photo_url: "",
-  cv_url: "",
 };
 
 function getInitialSettings() {
@@ -38,12 +37,11 @@ export default function CandidateRegister() {
   const [loading, setLoading] = useState(!initialSettings);
   const [form, setForm] = useState(emptyForm);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [uploadingCv, setUploadingCv] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
 
-  const uploading = uploadingPhoto || uploadingCv;
+  const uploading = uploadingPhoto;
   const coordinatorAllowed = canChooseCoordinator(form.class_or_id);
 
   useEffect(() => {
@@ -109,30 +107,6 @@ export default function CandidateRegister() {
     setUploadingPhoto(false);
   }
 
-  async function handleCvUpload(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setError("");
-
-    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
-    if (!isPdf) {
-      setError("CV harus berupa berkas PDF.");
-      update("cv_url", "");
-      e.target.value = "";
-      return;
-    }
-
-    setUploadingCv(true);
-    try {
-      const url = await uploadApplicationFile(file, "cv");
-      update("cv_url", url);
-    } catch (uploadError) {
-      update("cv_url", "");
-      setError("Gagal mengunggah CV: " + uploadError.message);
-    }
-    setUploadingCv(false);
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -177,10 +151,6 @@ export default function CandidateRegister() {
       setError("Foto diri dengan seragam putih biru lengkap wajib diunggah.");
       return;
     }
-    if (!form.cv_url) {
-      setError("CV dalam bentuk PDF wajib diunggah.");
-      return;
-    }
 
     setSubmitting(true);
     const { error: insertError } = await supabase.from("candidate_applications").insert({
@@ -193,7 +163,6 @@ export default function CandidateRegister() {
       mission: form.mission || null,
       contact: form.contact.trim() || null,
       photo_url: form.photo_url || null,
-      cv_url: form.cv_url || null,
     });
     setSubmitting(false);
 
@@ -226,8 +195,8 @@ export default function CandidateRegister() {
             <div className="stamp">✓</div>
             <h2 style={{ fontSize: 20 }}>Pendaftaran diterima</h2>
             <p style={{ color: "var(--color-ink-soft)", marginTop: 8 }}>
-              Terima kasih, {form.full_name}. Kamu mendaftar sebagai {form.position}. Foto diri dan
-              CV-mu sudah kami terima. Panitia akan memverifikasi pendaftaranmu. Jika lolos, namamu
+              Terima kasih, {form.full_name}. Kamu mendaftar sebagai {form.position}. Data pendaftaranmu sudah kami terima.
+              Panitia akan memverifikasi pendaftaranmu. Jika lolos, namamu
               akan muncul di halaman kandidat dengan nomor urut resmi.
             </p>
             <div style={{ marginTop: 20 }}>
