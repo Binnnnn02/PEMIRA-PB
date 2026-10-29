@@ -1,33 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../supabaseClient.js";
 
-// Mengurai teks tempel (dari Excel/Sheets = tab, atau CSV) menjadi baris siswa.
-// Format per baris: NIS, Nama Lengkap, Kelas
-function parseBulk(text) {
-  const valid = [];
+// Satu siswa per baris: "Nama" atau "Nama, Kelas" (tab/; juga boleh).
+// Baris tanpa kelas memakai kelas default.
+function parseBulk(text, defaultClass) {
+  const rows = [];
   const invalid = [];
   text
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean)
-    .forEach((line, index) => {
+    .forEach((line) => {
       const delimiter = line.includes("\t") ? "\t" : line.includes(";") ? ";" : ",";
-      const [nis, full_name, class_name] = line.split(delimiter).map((part) => part.trim());
-      // lewati baris header
-      if (index === 0 && /^nis$/i.test(nis || "")) return;
-      if (!nis || !full_name || !class_name) invalid.push(line);
-      else valid.push({ nis, full_name, class_name });
+      const [full_name, class_name] = line.split(delimiter).map((part) => part.trim());
+      const finalClass = class_name || defaultClass.trim();
+      if (!full_name || !finalClass) invalid.push(line);
+      else rows.push({ full_name, class_name: finalClass });
     });
-
-  // hapus duplikat NIS di dalam tempelan (ambil yang terakhir)
-  const unique = [...new Map(valid.map((row) => [row.nis, row])).values()];
-  return { rows: unique, invalid };
+  return { rows, invalid };
 }
 
 export default function AdminStudents() {
   const [students, setStudents] = useState([]);
-  const [form, setForm] = useState({ nis: "", full_name: "", class_name: "" });
+  const [form, setForm] = useState({ full_name: "", class_name: "" });
   const [bulkText, setBulkText] = useState("");
+  const [bulkClass, setBulkClass] = useState("");
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState("");
   const [error, setError] = useState("");
@@ -53,25 +50,20 @@ export default function AdminStudents() {
     setError("");
     setInfo("");
     const row = {
-      nis: form.nis.trim(),
       full_name: form.full_name.trim(),
       class_name: form.class_name.trim(),
     };
-    if (!row.nis || !row.full_name || !row.class_name) {
-      return setError("NIS, nama, dan kelas wajib diisi.");
+    if (!row.full_name || !row.class_name) {
+      return setError("Nama dan kelas wajib diisi.");
     }
     setBusy(true);
     const { error: insertError } = await supabase.from("students").insert(row);
     setBusy(false);
     if (insertError) {
-      setError(
-        insertError.code === "23505"
-          ? `NIS ${row.nis} sudah terdaftar.`
-          : "Gagal menambah siswa: " + insertError.message
-      );
+      setError("Gagal menambah siswa: " + insertError.message);
       return;
     }
-    setForm({ nis: "", full_name: "", class_name: form.class_name }); // kelas dipertahankan agar input beruntun lebih cepat
+    setForm({ full_name: "", class_name: form.class_name }); // kelas dipertahankan agar input beruntun lebih cepat
     setInfo(`${row.full_name} berhasil ditambahkan.`);
     load();
   }
@@ -79,23 +71,24 @@ export default function AdminStudents() {
   async function addBulk() {
     setError("");
     setInfo("");
-    const { rows, invalid } = parseBulk(bulkText);
+    const { rows, invalid } = parseBulk(bulkText, bulkClass);
     if (rows.length === 0) {
-      return setError("Tidak ada baris valid. Format: NIS, Nama Lengkap, Kelas (satu siswa per baris).");
+      return setError("Tidak ada baris valid. Isi kelas di kolom Kelas, lalu satu nama per baris.");
     }
+    // lewati nama yang sudah ada di kelas yang sama
+    const existing = new Set(students.map((s) => `${s.class_name}|${s.full_name.toLowerCase()}`));
+    const fresh = rows.filter((r) => !existing.has(`${r.class_name}|${r.full_name.toLowerCase()}`));
+    const skipped = rows.length - fresh.length;
+    if (fresh.length === 0) return setError("Semua nama sudah ada di kelas tersebut.");
     setBusy(true);
-    // upsert per NIS: NIS baru ditambahkan, NIS yang sudah ada diperbarui nama/kelasnya
-    const { error: upsertError } = await supabase
-      .from("students")
-      .upsert(rows, { onConflict: "nis" });
+    const { error: insertError } = await supabase.from("students").insert(fresh);
     setBusy(false);
-    if (upsertError) {
-      return setError("Gagal impor: " + upsertError.message);
-    }
+    if (insertError) return setError("Gagal impor: " + insertError.message);
     setBulkText("");
     setInfo(
-      `${rows.length} siswa berhasil diimpor` +
-        (invalid.length ? `, ${invalid.length} baris dilewati karena tidak lengkap.` : ".")
+      `${fresh.length} siswa berhasil ditambahkan` +
+        (skipped ? `, ${skipped} sudah ada (dilewati)` : "") +
+        (invalid.length ? `, ${invalid.length} baris tidak lengkap.` : ".")
     );
     load();
   }
@@ -134,7 +127,6 @@ export default function AdminStudents() {
     const q = search.toLowerCase();
     const matchSearch =
       s.full_name.toLowerCase().includes(q) ||
-      s.nis.toLowerCase().includes(q) ||
       s.class_name.toLowerCase().includes(q);
     return matchSearch && (!classFilter || s.class_name === classFilter);
   });
@@ -156,10 +148,6 @@ export default function AdminStudents() {
           <h3>Tambah satu siswa</h3>
           <form onSubmit={addOne}>
             <div className="form-field">
-              <label>NIS</label>
-              <input value={form.nis} onChange={(e) => setForm({ ...form, nis: e.target.value })} placeholder="Nomor induk siswa" />
-            </div>
-            <div className="form-field">
               <label>Nama lengkap</label>
               <input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Nama siswa" />
             </div>
@@ -176,17 +164,20 @@ export default function AdminStudents() {
         <div className="card">
           <h3>Impor banyak siswa</h3>
           <p style={{ fontSize: 12.5, color: "var(--color-ink-soft)", marginTop: 0 }}>
-            Tempel dari Excel/Sheets (3 kolom: NIS, Nama, Kelas) atau CSV. Satu siswa per baris.
-            NIS yang sudah ada akan diperbarui nama dan kelasnya.
+            Isi kelas, lalu tempel daftar nama (satu siswa per baris). Nama yang sudah ada di kelas itu dilewati.
           </p>
+          <div className="form-field">
+            <label>Kelas</label>
+            <input value={bulkClass} onChange={(e) => setBulkClass(e.target.value)} placeholder="mis. 8B" />
+          </div>
           <textarea
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
             rows={7}
-            placeholder={"12345, Budi Santoso, X-1\n12346, Siti Aminah, X-1"}
+            placeholder={"Budi Santoso\nSiti Aminah"}
             style={{ width: "100%", fontFamily: "var(--font-mono)", fontSize: 13 }}
           />
-          <button className="btn btn-purple btn-small" onClick={addBulk} disabled={busy || !bulkText.trim()} style={{ marginTop: 8 }}>
+          <button className="btn btn-purple btn-small" onClick={addBulk} disabled={busy || !bulkText.trim() || !bulkClass.trim()} style={{ marginTop: 8 }}>
             {busy ? "…" : "Impor siswa"}
           </button>
         </div>
@@ -207,7 +198,7 @@ export default function AdminStudents() {
             </select>
             <input
               className="search-input"
-              placeholder="Cari nama, NIS, kelas…"
+              placeholder="Cari nama atau kelas…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{ width: 200 }}
@@ -219,7 +210,6 @@ export default function AdminStudents() {
           <table>
             <thead>
               <tr>
-                <th>NIS</th>
                 <th>Nama</th>
                 <th>Kelas</th>
                 <th>Status</th>
@@ -229,7 +219,6 @@ export default function AdminStudents() {
             <tbody>
               {filtered.map((s) => (
                 <tr key={s.id}>
-                  <td><code style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{s.nis}</code></td>
                   <td style={{ fontWeight: 600, fontSize: 14 }}>{s.full_name}</td>
                   <td style={{ fontSize: 13 }}>{s.class_name}</td>
                   <td>
@@ -249,7 +238,7 @@ export default function AdminStudents() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: "center", color: "var(--color-ink-soft)", padding: "24px 0" }}>
+                  <td colSpan={4} style={{ textAlign: "center", color: "var(--color-ink-soft)", padding: "24px 0" }}>
                     Belum ada data siswa.
                   </td>
                 </tr>

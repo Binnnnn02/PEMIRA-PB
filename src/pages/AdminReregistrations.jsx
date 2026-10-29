@@ -10,7 +10,7 @@ function generateCode() {
 }
 
 function makeMessage(row, code) {
-  return `Halo ${row.students?.full_name || "Siswa"}.\n\nBerikut akses PEMIRA kamu:\nNama: ${row.students?.full_name || "-"}\nNIS: ${row.students?.nis || "-"}\nToken: ${code}\n\nGunakan token tersebut saat pemungutan suara. Jangan membagikan token kepada orang lain.`;
+  return `Halo ${row.students?.full_name || "Siswa"}.\n\nBerikut akses PEMIRA kamu:\nNama: ${row.students?.full_name || "-"}\nKelas: ${row.students?.class_name || "-"}\nToken: ${code}\n\nGunakan token tersebut saat pemungutan suara. Jangan membagikan token kepada orang lain.`;
 }
 
 const STATUS_LABEL = {
@@ -148,7 +148,7 @@ export default function AdminReregistrations() {
           </h3>
           <input
             className="search-input"
-            placeholder="Cari nama, NIS, kelas…"
+            placeholder="Cari nama, kelas…"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             style={{ width: 220 }}
@@ -175,9 +175,6 @@ export default function AdminReregistrations() {
                     <td>
                       <div style={{ fontWeight: 600, fontSize: 14 }}>
                         {row.students?.full_name || "—"}
-                      </div>
-                      <div style={{ fontSize: 12, color: "var(--color-ink-soft)", marginTop: 1 }}>
-                        NIS: {row.students?.nis || "belum diisi"}
                       </div>
                     </td>
                     <td style={{ fontSize: 13 }}>{row.students?.class_name || "—"}</td>

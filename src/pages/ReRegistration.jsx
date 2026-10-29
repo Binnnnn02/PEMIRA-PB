@@ -130,7 +130,7 @@ export default function ReRegistration() {
             <div className="banner banner-success">Daftar ulang berhasil dikirim.</div>
             <h3 style={{ marginTop: 12 }}>Data kamu sudah tercatat</h3>
             <p className="field-hint" style={{ textAlign: "center", marginBottom: 20 }}>
-              Panitia akan mengirimkan nama, NIS, dan token melalui WhatsApp sesuai jadwal. Jangan membagikan token kepada orang lain.
+              Panitia akan mengirimkan nama, kelas, dan token melalui WhatsApp sesuai jadwal. Jangan membagikan token kepada orang lain.
             </p>
             <Link to="/" className="btn btn-purple">Kembali ke Beranda</Link>
           </div>
