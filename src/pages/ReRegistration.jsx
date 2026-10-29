@@ -40,7 +40,7 @@ export default function ReRegistration() {
     if (!initialSettings) setLoading(true);
     const [{ data: election }, { data: studentRows, error: studentsError }] = await Promise.all([
       supabase.from("election_settings").select("*").eq("id", 1).maybeSingle(),
-      supabase.from("student_directory").select("id, class_name, full_name").order("class_name").order("full_name"),
+      supabase.from("student_directory").select("id, class_name, full_name, already_registered").order("class_name").order("full_name"),
     ]);
 
     if (election) {
@@ -74,6 +74,9 @@ export default function ReRegistration() {
 
     const normalizedPhone = normalizePhone(phone);
     if (!studentId || !className) return setError("Pilih kelas dan nama siswa terlebih dahulu.");
+    if (students.find((student) => student.id === studentId)?.already_registered) {
+      return setError("Siswa ini sudah terdaftar ulang untuk PEMIRA ini.");
+    }
     if (!/^08[0-9]{8,13}$/.test(normalizedPhone)) {
       return setError("Nomor WhatsApp harus diawali 08 dan berisi 10–15 digit.");
     }
@@ -178,7 +181,16 @@ export default function ReRegistration() {
               <label htmlFor="student_id">Nama siswa</label>
               <select id="student_id" value={studentId} onChange={(event) => setStudentId(event.target.value)} required disabled={!className || loading}>
                 <option value="">Pilih nama</option>
-                {filteredStudents.map((student) => <option key={student.id} value={student.id}>{student.full_name}</option>)}
+                {filteredStudents.map((student) => (
+                  <option
+                    key={student.id}
+                    value={student.id}
+                    disabled={student.already_registered}
+                    style={student.already_registered ? { color: "#9ca3af" } : undefined}
+                  >
+                    {student.full_name}{student.already_registered ? " (sudah daftar)" : ""}
+                  </option>
+                ))}
               </select>
             </div>
 
