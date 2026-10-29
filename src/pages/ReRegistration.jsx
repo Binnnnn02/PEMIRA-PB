@@ -40,7 +40,7 @@ export default function ReRegistration() {
     if (!initialSettings) setLoading(true);
     const [{ data: election }, { data: studentRows, error: studentsError }] = await Promise.all([
       supabase.from("election_settings").select("*").eq("id", 1).maybeSingle(),
-      supabase.from("student_directory").select("id, class_name, full_name").eq("is_active", true).order("class_name").order("full_name"),
+      supabase.from("student_directory").select("id, class_name, full_name").order("class_name").order("full_name"),
     ]);
 
     if (election) {

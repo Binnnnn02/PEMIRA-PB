@@ -4,6 +4,7 @@ import { supabase } from "../supabaseClient.js";
 const NAV_ICONS = {
   overview:     "◈",
   applications: "📋",
+  siswa:        "🎓",
   "daftar-ulang": "📝",
   candidates:   "👤",
   voters:       "🗳️",
@@ -14,6 +15,7 @@ const NAV_ICONS = {
 const links = [
   { to: "overview",     label: "Ringkasan" },
   { to: "applications", label: "Pendaftaran Calon" },
+  { to: "siswa",        label: "Data Siswa" },
   { to: "daftar-ulang", label: "Daftar Ulang" },
   { to: "candidates",   label: "Kandidat" },
   { to: "voters",       label: "Pemilih" },

@@ -11,6 +11,7 @@ import AdminOverview from "./pages/AdminOverview.jsx";
 import AdminApplications from "./pages/AdminApplications.jsx";
 import AdminCandidates from "./pages/AdminCandidates.jsx";
 import AdminVoters from "./pages/AdminVoters.jsx";
+import AdminStudents from "./pages/AdminStudents.jsx";
 import AdminResults from "./pages/AdminResults.jsx";
 import AdminSettings from "./pages/AdminSettings.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -36,6 +37,7 @@ export default function App() {
         <Route index element={<Navigate to="overview" replace />} />
         <Route path="overview" element={<AdminOverview />} />
         <Route path="applications" element={<AdminApplications />} />
+        <Route path="siswa" element={<AdminStudents />} />
         <Route path="daftar-ulang" element={<AdminReregistrations />} />
         <Route path="candidates" element={<AdminCandidates />} />
         <Route path="voters" element={<AdminVoters />} />
