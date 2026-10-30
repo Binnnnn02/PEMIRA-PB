@@ -188,8 +188,9 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="home-footer">
-        <div>{settings?.organization || "Organisasi"} · Diselenggarakan oleh Pengurus 2025/2026 dan DPK.</div>
+        <div>{settings?.organization || "Organisasi"} · Diselenggarakan oleh DPK dan Pengurus 2025/2026.</div>
         <div style={{ marginTop: 4 }}>© {new Date().getFullYear()} SMP Permata Bunda. All rights reserved.</div>
+        <div style={{ marginTop: 4 }}>Made by <a href="https://www.instagram.com/biibiinn._/" target="_blank" rel="noopener noreferrer">Bibin</a>.</div>
       </footer>
     </div>
   );
