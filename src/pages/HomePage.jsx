@@ -78,7 +78,7 @@ export default function HomePage() {
 
         <div className="hero-actions">
           <Link to="/pilih" className="btn btn-purple" style={{ width: "auto" }}>
-            Pilih Nama &amp; Memilih
+            Pilih Calon Ketua Umum
           </Link>
           <Link to="/pendaftaran-calon" className="btn btn-outline" style={{ width: "auto" }}>
             Daftar sebagai Calon

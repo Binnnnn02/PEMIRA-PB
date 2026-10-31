@@ -83,7 +83,11 @@ export default function VotePage() {
           <option value="">{className ? "Pilih nama dari kelas ini" : "Pilih kelas terlebih dahulu"}</option>{studentsInClass.map((s) => <option key={s.id} value={s.id}>{s.full_name}</option>)}
         </select></div>
         {error && <div className="banner banner-danger">{error}</div>}
-        <p className="field-hint">Pemilihan nama saja tidak memverifikasi bahwa kamu adalah siswa tersebut. Minta panitia memastikan identitas sebelum suara dikirim.</p>
+        <p className="field-hint">Panitia tidak bisa melihat pilihanmu, panitia hanya melihat status voting dan jumlah suara.</p>
+        <p className="field-hint">
+          NB: Jika ada masalah teknis seperti namamu statusnya sudah melakukan PEMIRA, silakan hubungi panitia melalui WhatsApp. <br />
+          Tim IT: Bibin - <a href="https://wa.me/0895629208339" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        </p>
         <button className="btn btn-purple" onClick={continueToBallot} disabled={busy || ["before", "after", "inactive"].includes(status.type)}>{busy ? "Memeriksa…" : "Lanjutkan"}</button>
         <Link to="/" className="btn btn-outline" style={{ marginTop: 8 }}>Kembali ke Beranda</Link>
       </div>}
