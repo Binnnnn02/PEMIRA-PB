@@ -122,13 +122,6 @@ export default function AdminSettings() {
           ? new Date(form.registration_end).toISOString()
           : null,
         registration_open: form.registration_open,
-        reregistration_start: form.reregistration_start
-          ? new Date(form.reregistration_start).toISOString()
-          : null,
-        reregistration_end: form.reregistration_end
-          ? new Date(form.reregistration_end).toISOString()
-          : null,
-        reregistration_open: form.reregistration_open,
       })
       .eq("id", 1)
       .select();
@@ -230,36 +223,6 @@ export default function AdminSettings() {
           </Section>
         </div>
 
-        {/* Re-registration */}
-        <div className="card">
-          <Section title="Daftar Ulang PEMIRA">
-            <div className="form-grid" style={{ marginBottom: 14 }}>
-              <div className="form-field">
-                <label>Mulai daftar ulang</label>
-                <input
-                  type="datetime-local"
-                  value={toLocalInputValue(form.reregistration_start)}
-                  onChange={(e) => update("reregistration_start", e.target.value)}
-                />
-              </div>
-              <div className="form-field">
-                <label>Selesai daftar ulang</label>
-                <input
-                  type="datetime-local"
-                  value={toLocalInputValue(form.reregistration_end)}
-                  onChange={(e) => update("reregistration_end", e.target.value)}
-                />
-              </div>
-            </div>
-            <Toggle
-              id="reregistration_open"
-              checked={!!form.reregistration_open}
-              onChange={(e) => update("reregistration_open", e.target.checked)}
-              label="Buka daftar ulang PEMIRA"
-            />
-          </Section>
-        </div>
-
         {/* Voting */}
         <div className="card">
           <Section title="Pemungutan Suara">
@@ -296,8 +259,7 @@ export default function AdminSettings() {
                 lineHeight: 1.6,
               }}
             >
-              Selama nonaktif, halaman voting akan menampilkan status "belum dibuka" meski pemilih memasukkan kode
-              yang benar. Aturan yang sama berlaku untuk pendaftaran calon dan daftar ulang.
+              Selama nonaktif, halaman voting akan menampilkan status "belum dibuka". Aturan yang sama berlaku untuk pendaftaran calon.
             </p>
           </Section>
         </div>

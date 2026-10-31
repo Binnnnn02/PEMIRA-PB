@@ -104,13 +104,13 @@ export default function AdminStudents() {
   }
 
   async function remove(student) {
-    if (!confirm(`Hapus ${student.full_name}? Siswa yang sudah daftar ulang tidak bisa dihapus (nonaktifkan saja).`)) return;
+    if (!confirm(`Hapus ${student.full_name}? Siswa yang sudah memberikan suara tidak bisa dihapus (nonaktifkan saja).`)) return;
     setError("");
     const { error: deleteError } = await supabase.from("students").delete().eq("id", student.id);
     if (deleteError) {
       setError(
         deleteError.code === "23503"
-          ? "Siswa ini sudah memiliki data daftar ulang, jadi tidak bisa dihapus. Nonaktifkan saja."
+          ? "Siswa ini sudah memiliki data partisipasi, jadi tidak bisa dihapus. Nonaktifkan saja."
           : "Gagal menghapus: " + deleteError.message
       );
       return;
@@ -137,7 +137,7 @@ export default function AdminStudents() {
     <div>
       <h2>Data Siswa</h2>
       <p className="admin-sub">
-        {students.length} siswa · {activeCount} aktif · Hanya siswa aktif yang muncul di form daftar ulang
+        {students.length} siswa · {activeCount} aktif · Hanya siswa aktif yang muncul di daftar pemilih
       </p>
 
       {error && <div className="banner banner-danger" style={{ marginBottom: 14 }}>{error}</div>}

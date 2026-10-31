@@ -13,11 +13,8 @@ export default function AdminOverview() {
   async function load() {
     const [{ count: voters }, { count: voted }, { count: candidates }, { count: pending }, { data: s }] =
       await Promise.all([
-        supabase.from("voters").select("*", { count: "exact", head: true }),
-        supabase
-          .from("voters")
-          .select("*", { count: "exact", head: true })
-          .eq("has_voted", true),
+        supabase.from("voter_status").select("student_id", { count: "exact", head: true }),
+        supabase.from("voter_status").select("student_id", { count: "exact", head: true }).eq("status", "voted"),
         supabase.from("candidates").select("*", { count: "exact", head: true }),
         supabase
           .from("candidate_applications")

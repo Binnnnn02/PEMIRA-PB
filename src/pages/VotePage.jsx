@@ -1,280 +1,110 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../supabaseClient.js";
 import Countdown from "../components/Countdown.jsx";
 
-const CODE_LENGTH = 6;
-
-const REASON_MESSAGES = {
-  not_found: "Kode suara tidak ditemukan. Periksa kembali kode kamu.",
-  already_voted: "Kode ini sudah digunakan untuk memilih.",
-  invalid_code: "Kode suara tidak valid.",
-  invalid_candidate: "Kandidat tidak valid, silakan pilih ulang.",
-  not_active: "Pemungutan suara belum dibuka oleh panitia.",
-  not_started: "Pemungutan suara belum dimulai.",
-  ended: "Waktu pemungutan suara sudah berakhir.",
-};
-
-function getInitialSettings() {
-  try {
-    const cached = sessionStorage.getItem("pemira_settings_cache");
-    return cached ? JSON.parse(cached) : null;
-  } catch {
-    return null;
-  }
-}
-
 export default function VotePage() {
-  const initialSettings = getInitialSettings();
-  const [settings, setSettings] = useState(initialSettings);
-  const [loading, setLoading] = useState(!initialSettings);
-  const [step, setStep] = useState("code"); // code | ballot | submitting | done | closed
-  const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(""));
-  const [checking, setChecking] = useState(false);
-  const [error, setError] = useState("");
+  const [settings, setSettings] = useState(null);
+  const [students, setStudents] = useState([]);
   const [candidates, setCandidates] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [voterName, setVoterName] = useState("");
-  const inputRefs = useRef([]);
+  const [className, setClassName] = useState("");
+  const [studentId, setStudentId] = useState("");
+  const [studentName, setStudentName] = useState("");
+  const [selected, setSelected] = useState("");
+  const [step, setStep] = useState("select");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    supabase
-      .from("election_settings")
-      .select("*")
-      .eq("id", 1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) {
-          setSettings(data);
-          try { sessionStorage.setItem("pemira_settings_cache", JSON.stringify(data)); } catch {}
-        }
-        setLoading(false);
-      });
+    Promise.all([
+      supabase.from("election_settings").select("*").eq("id", 1).maybeSingle(),
+      supabase.from("student_directory").select("id, full_name, class_name").order("full_name"),
+    ]).then(([settingsResult, rosterResult]) => {
+      if (settingsResult.data) setSettings(settingsResult.data);
+      if (rosterResult.error) setError("Gagal memuat daftar siswa. Silakan coba lagi.");
+      setStudents(rosterResult.data || []);
+    });
   }, []);
 
-  const windowStatus = getWindowStatus(settings, loading);
+  const status = getWindowStatus(settings);
+  const classes = [...new Set(students.map((student) => student.class_name).filter(Boolean))]
+    .sort(new Intl.Collator("id", { numeric: true, sensitivity: "base" }).compare);
+  const studentsInClass = students.filter((student) => student.class_name === className);
 
-  function handleDigitChange(index, value) {
-    const clean = value.replace(/[^a-zA-Z0-9]/g, "").slice(-1);
-    const next = [...digits];
-    next[index] = clean;
-    setDigits(next);
-    if (clean && index < CODE_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  }
-
-  function handleKeyDown(index, e) {
-    if (e.key === "Backspace" && !digits[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  }
-
-  async function submitCode() {
+  async function continueToBallot() {
     setError("");
-    const code = digits.join("").toUpperCase();
-    if (code.length !== CODE_LENGTH) {
-      setError("Lengkapi seluruh kode terlebih dahulu.");
-      return;
-    }
-    setChecking(true);
-    const { data, error: rpcError } = await supabase.rpc("check_voter_code", {
-      p_code: code,
-    });
-    setChecking(false);
-
-    if (rpcError) {
-      setError("Terjadi kesalahan. Coba lagi.");
-      return;
-    }
-    if (!data.valid) {
-      setError(REASON_MESSAGES.not_found);
-      return;
-    }
-    if (data.has_voted) {
-      setError(REASON_MESSAGES.already_voted);
-      return;
-    }
-
-    setVoterName(data.name || "");
-
-    const { data: candidateRows, error: candidateError } = await supabase
-      .from("candidates")
-      .select("*")
-      .order("number", { ascending: true });
-
-    if (candidateError) {
-      setError("Gagal memuat daftar kandidat.");
-      return;
-    }
-
-    setCandidates(candidateRows || []);
+    if (!className) return setError("Pilih kelasmu terlebih dahulu.");
+    if (!studentId) return setError("Pilih namamu dari daftar siswa.");
+    setBusy(true);
+    const { data, error: rpcError } = await supabase.rpc("check_student_vote", { p_student_id: studentId });
+    setBusy(false);
+    if (rpcError || !data?.valid) return setError("Nama siswa tidak ditemukan atau sudah tidak aktif.");
+    if (data.status === "voted") return setError("Nama ini sudah tercatat memilih.");
+    setStudentName(data.name);
+    const { data: rows, error: candidatesError } = await supabase.from("candidates").select("*").order("number");
+    if (candidatesError) return setError("Gagal memuat daftar kandidat.");
+    setCandidates(rows || []);
     setStep("ballot");
   }
 
   async function submitVote() {
-    if (!selected) return;
-    setStep("submitting");
-    const code = digits.join("").toUpperCase();
-    const { data, error: rpcError } = await supabase.rpc("cast_vote", {
-      p_code: code,
+    if (!selected || busy) return;
+    setBusy(true);
+    setError("");
+    const { data, error: rpcError } = await supabase.rpc("cast_student_vote", {
+      p_student_id: studentId,
       p_candidate_id: selected,
     });
-
-    if (rpcError || !data.success) {
-      setError(REASON_MESSAGES[data?.reason] || "Gagal mengirim suara. Coba lagi.");
-      setStep("ballot");
+    setBusy(false);
+    if (rpcError || !data?.success) {
+      if (data?.reason === "already_voted") {
+        setStep("done");
+        return;
+      }
+      setError(data?.reason === "not_active" ? "Pemungutan suara sedang ditutup." : "Suara gagal dikirim. Silakan coba lagi.");
       return;
     }
-
     setStep("done");
   }
 
-  return (
-    <div className="page">
-      <div className="masthead">
-        <div className="kicker">Bilik Suara Digital</div>
-        <h1>{settings?.title || "PEMIRA"}</h1>
-        <div className="org">{settings?.organization || ""}</div>
-      </div>
-
-      <div className="page-narrow">
-        {step !== "done" && ["before", "after", "inactive"].includes(windowStatus.type) && (
-          <div className="banner banner-danger" style={{ marginBottom: 18 }}>
-            {windowStatus.type === "before" && (
-              <>
-                Pemungutan suara dibuka dalam{" "}
-                <Countdown target={settings.start_time} />
-              </>
-            )}
-            {windowStatus.type === "after" && "Pemungutan suara telah ditutup."}
-            {windowStatus.type === "inactive" &&
-              "Pemungutan suara belum dibuka oleh panitia."}
-          </div>
-        )}
-
-        {step === "code" && (
-          <div className="ballot-slip">
-            <h2 style={{ fontSize: 18, textAlign: "center" }}>
-              Masukkan kode suara kamu
-            </h2>
-            <div className="code-boxes">
-              {digits.map((d, i) => (
-                <input
-                  key={i}
-                  ref={(el) => (inputRefs.current[i] = el)}
-                  value={d}
-                  maxLength={1}
-                  inputMode="text"
-                  onChange={(e) => handleDigitChange(i, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(i, e)}
-                />
-              ))}
-            </div>
-            <div className="field-hint">
-              Kode {CODE_LENGTH} karakter diberikan oleh panitia PEMIRA.
-            </div>
-
-            {error && <div className="banner banner-danger">{error}</div>}
-
-            <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
-              <button
-                className="btn btn-purple"
-                onClick={submitCode}
-                disabled={checking || ["after", "inactive"].includes(windowStatus.type)}
-              >
-                {checking ? "Memeriksa…" : "Lanjutkan"}
-              </button>
-              <Link to="/" className="btn btn-outline">
-                Kembali ke Beranda
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {(step === "ballot" || step === "submitting") && (
-          <div>
-            <p style={{ textAlign: "center", color: "var(--color-ink-soft)" }}>
-              {voterName ? `Halo, ${voterName}. ` : ""}
-              Pilih satu paslon di bawah ini.
-            </p>
-
-            <div className="candidate-list">
-              {candidates.map((c) => (
-                <button
-                  key={c.id}
-                  className={`candidate-row ${selected === c.id ? "selected" : ""}`}
-                  onClick={() => setSelected(c.id)}
-                  disabled={step === "submitting"}
-                >
-                  <div className="candidate-number">{c.number}</div>
-                  {c.photo_url ? (
-                    <img className="candidate-photo" src={c.photo_url} alt="" />
-                  ) : (
-                    <div className="candidate-photo" />
-                  )}
-                  <div className="candidate-info">
-                    <div className="names">
-                      {c.name}
-                      {c.running_mate ? ` & ${c.running_mate}` : ""}
-                    </div>
-                    {c.vision && (
-                      <div className="running-mate">{truncate(c.vision, 70)}</div>
-                    )}
-                  </div>
-                  <div className={`ink-mark ${selected === c.id ? "filled" : ""}`} />
-                </button>
-              ))}
-            </div>
-
-            {error && <div className="banner banner-danger">{error}</div>}
-
-            <div style={{ marginTop: 22 }}>
-              <button
-                className="btn btn-purple"
-                onClick={submitVote}
-                disabled={!selected || step === "submitting"}
-              >
-                {step === "submitting" ? "Mengirim suara…" : "Kirim suara"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === "done" && (
-          <div className="ballot-slip" style={{ textAlign: "center" }}>
-            <div className="stamp">✓</div>
-            <h2 style={{ fontSize: 20 }}>Suara kamu telah tercatat</h2>
-            <p style={{ color: "var(--color-ink-soft)", marginTop: 8 }}>
-              Terima kasih sudah berpartisipasi dalam {settings?.title || "PEMIRA"}.
-              Kode suara kamu tidak dapat digunakan lagi.
-            </p>
-            <div style={{ marginTop: 20 }}>
-              <Link to="/" className="btn btn-outline">
-                Kembali ke Beranda
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
+  return <div className="page">
+    <div className="masthead"><div className="kicker">Bilik Suara Digital</div><h1>{settings?.title || "PEMIRA"}</h1><div className="org">{settings?.organization || ""}</div></div>
+    <div className="page-narrow">
+      {["before", "after", "inactive"].includes(status.type) && <div className="banner banner-danger" style={{ marginBottom: 18 }}>
+        {status.type === "before" ? <>Pemungutan suara dibuka dalam <Countdown target={settings?.start_time} /></> : status.type === "after" ? "Pemungutan suara telah ditutup." : "Pemungutan suara belum dibuka oleh panitia."}
+      </div>}
+      {step === "select" && <div className="ballot-slip">
+        <h2 style={{ fontSize: 18, textAlign: "center" }}>Pilih kelas dan namamu</h2>
+        <p style={{ color: "var(--color-ink-soft)", textAlign: "center" }}>Pilih kelasmu terlebih dahulu. Daftar nama akan menampilkan siswa dari kelas itu saja.</p>
+        <div className="form-field"><label>Kelas</label><select value={className} onChange={(e) => { setClassName(e.target.value); setStudentId(""); setError(""); }}>
+          <option value="">Pilih kelas</option>{classes.map((name) => <option key={name} value={name}>{name}</option>)}
+        </select></div>
+        <div className="form-field"><label>Nama siswa</label><select value={studentId} onChange={(e) => { setStudentId(e.target.value); setError(""); }} disabled={!className}>
+          <option value="">{className ? "Pilih nama dari kelas ini" : "Pilih kelas terlebih dahulu"}</option>{studentsInClass.map((s) => <option key={s.id} value={s.id}>{s.full_name}</option>)}
+        </select></div>
+        {error && <div className="banner banner-danger">{error}</div>}
+        <p className="field-hint">Pemilihan nama saja tidak memverifikasi bahwa kamu adalah siswa tersebut. Minta panitia memastikan identitas sebelum suara dikirim.</p>
+        <button className="btn btn-purple" onClick={continueToBallot} disabled={busy || ["before", "after", "inactive"].includes(status.type)}>{busy ? "Memeriksa…" : "Lanjutkan"}</button>
+        <Link to="/" className="btn btn-outline" style={{ marginTop: 8 }}>Kembali ke Beranda</Link>
+      </div>}
+      {step === "ballot" && <div>
+        <p style={{ textAlign: "center", color: "var(--color-ink-soft)" }}>Halo, {studentName}. Pilih satu kandidat. Pilihanmu dirahasiakan dan tidak ditampilkan kepada admin.</p>
+        <div className="candidate-list">{candidates.map((c) => <button key={c.id} className={`candidate-row ${selected === c.id ? "selected" : ""}`} onClick={() => setSelected(c.id)}>
+          <div className="candidate-number">{c.number}</div>{c.photo_url ? <img className="candidate-photo" src={c.photo_url} alt="" /> : <div className="candidate-photo" />}
+          <div className="candidate-info"><div className="names">{c.name}{c.running_mate ? ` & ${c.running_mate}` : ""}</div>{c.vision && <div className="running-mate">{c.vision.length > 70 ? `${c.vision.slice(0, 70)}…` : c.vision}</div>}</div><div className={`ink-mark ${selected === c.id ? "filled" : ""}`} />
+        </button>)}</div>
+        {error && <div className="banner banner-danger">{error}</div>}
+        <button className="btn btn-purple" style={{ marginTop: 22 }} onClick={submitVote} disabled={!selected || busy}>{busy ? "Mengirim suara…" : "Kirim Suara"}</button>
+      </div>}
+      {step === "done" && <div className="ballot-slip" style={{ textAlign: "center" }}><div className="stamp">✓</div><h2 style={{ fontSize: 20 }}>Status voting tercatat</h2><p style={{ color: "var(--color-ink-soft)", marginTop: 8 }}>Terima kasih sudah berpartisipasi. Nama tercatat sudah memilih; pilihan kandidat tetap rahasia.</p><Link to="/" className="btn btn-outline" style={{ marginTop: 20 }}>Kembali ke Beranda</Link></div>}
     </div>
-  );
+  </div>;
 }
 
-function truncate(text, max) {
-  if (!text) return "";
-  return text.length > max ? `${text.slice(0, max)}…` : text;
-}
-
-function getWindowStatus(settings, loading) {
-  if (loading) return { type: "loading" };
+function getWindowStatus(settings) {
   if (!settings || !settings.is_active) return { type: "inactive" };
   const now = Date.now();
-  if (settings.start_time && now < new Date(settings.start_time).getTime()) {
-    return { type: "before" };
-  }
-  if (settings.end_time && now > new Date(settings.end_time).getTime()) {
-    return { type: "after" };
-  }
+  if (settings.start_time && now < new Date(settings.start_time).getTime()) return { type: "before" };
+  if (settings.end_time && now > new Date(settings.end_time).getTime()) return { type: "after" };
   return { type: "open" };
 }

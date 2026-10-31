@@ -15,7 +15,6 @@ function getInitialSettings() {
 export default function HomePage() {
   const [settings, setSettings] = useState(getInitialSettings);
   const [candidates, setCandidates] = useState([]);
-  const [stats, setStats] = useState({ voters: 0, voted: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -32,16 +31,7 @@ export default function HomePage() {
       .select("*")
       .order("number")
       .then(({ data }) => setCandidates(data || []));
-    loadStats();
   }, []);
-
-  async function loadStats() {
-    const [{ count: voters }, { count: voted }] = await Promise.all([
-      supabase.from("voters").select("*", { count: "exact", head: true }),
-      supabase.from("voters").select("*", { count: "exact", head: true }).eq("has_voted", true),
-    ]);
-    setStats({ voters: voters || 0, voted: voted || 0 });
-  }
 
   const votingStatus = getStatus(settings?.is_active, settings?.start_time, settings?.end_time);
   const registrationStatus = getStatus(
@@ -67,9 +57,8 @@ export default function HomePage() {
         <nav className={menuOpen ? "open" : ""}>
           <Link to="/kandidat" onClick={() => setMenuOpen(false)}>Kandidat</Link>
           <Link to="/pendaftaran-calon" onClick={() => setMenuOpen(false)}>Daftar Calon</Link>
-          <Link to="/daftar-ulang" onClick={() => setMenuOpen(false)}>Daftar Ulang</Link>
           <Link to="/pilih" className="home-nav-cta" onClick={() => setMenuOpen(false)}>
-            Masuk Memilih
+            Pilih Nama &amp; Memilih
           </Link>
         </nav>
       </header>
@@ -84,19 +73,15 @@ export default function HomePage() {
           )}
         </h1>
         <p className="hero-lede">
-          Satu suara, satu ketukan. Daftarkan dirimu sebagai calon pengurus, atau gunakan
-          kode suaramu untuk memilih pemimpin organisasi berikutnya.
+          Satu siswa, satu suara. Pilih namamu dari daftar untuk memilih pemimpin organisasi berikutnya.
         </p>
 
         <div className="hero-actions">
           <Link to="/pilih" className="btn btn-purple" style={{ width: "auto" }}>
-            Masuk &amp; Memilih
+            Pilih Nama &amp; Memilih
           </Link>
           <Link to="/pendaftaran-calon" className="btn btn-outline" style={{ width: "auto" }}>
             Daftar sebagai Calon
-          </Link>
-          <Link to="/daftar-ulang" className="btn btn-outline" style={{ width: "auto" }}>
-            Daftar Ulang PEMIRA
           </Link>
         </div>
 
@@ -105,24 +90,6 @@ export default function HomePage() {
           <StatusChip label="Pemungutan suara" status={votingStatus} settings={settings} field="voting" />
         </div>
       </section>
-
-      {/* Stats Strip */}
-      {stats.voters > 0 && (
-        <section className="stat-strip">
-          <div>
-            <div className="stat-strip-value">{stats.voters}</div>
-            <div className="stat-strip-label">pemilih terdaftar</div>
-          </div>
-          <div>
-            <div className="stat-strip-value">{stats.voted}</div>
-            <div className="stat-strip-label">suara masuk</div>
-          </div>
-          <div>
-            <div className="stat-strip-value">{candidates.length}</div>
-            <div className="stat-strip-label">calon pengurus</div>
-          </div>
-        </section>
-      )}
 
       {/* Candidate Preview */}
       {candidates.length > 0 && (
@@ -173,8 +140,7 @@ export default function HomePage() {
           <li>
             <span className="steps-mark">3</span>
             <div>
-              <strong>Pemungutan suara dibuka.</strong> Setiap pemilih memasukkan kode suara unik
-              dan memilih satu paslon — satu kode hanya berlaku sekali.
+              <strong>Pemungutan suara dibuka.</strong> Siswa memilih nama dari daftar dan mengirim satu suara.
             </div>
           </li>
           <li>

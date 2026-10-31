@@ -19,16 +19,8 @@ export default function AdminResults() {
   useEffect(() => {
     load();
 
-    const channel = supabase
-      .channel("votes-live")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "votes" }, () => {
-        load();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    const timer = window.setInterval(load, 15000);
+    return () => window.clearInterval(timer);
   }, []);
 
   async function load() {
