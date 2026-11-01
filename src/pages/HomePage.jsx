@@ -58,7 +58,7 @@ export default function HomePage() {
           <Link to="/kandidat" onClick={() => setMenuOpen(false)}>Kandidat</Link>
           <Link to="/pendaftaran-calon" onClick={() => setMenuOpen(false)}>Daftar Calon</Link>
           <Link to="/pilih" className="home-nav-cta" onClick={() => setMenuOpen(false)}>
-            Pilih Nama &amp; Memilih
+            Pilih Calon Ketua Umum
           </Link>
         </nav>
       </header>
