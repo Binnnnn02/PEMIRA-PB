@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../supabaseClient.js";
 
-// Satu siswa per baris: "Nama" atau "Nama, Kelas" (tab/; juga boleh).
-// Baris tanpa kelas memakai kelas default.
+// Satu pemilih per baris: "Nama" atau "Nama, Kelas/kategori" (tab/; juga boleh).
+// Baris tanpa kelas/kategori memakai nilai default.
 function parseBulk(text, defaultClass) {
   const rows = [];
   const invalid = [];
@@ -54,7 +54,7 @@ export default function AdminStudents() {
       class_name: form.class_name.trim(),
     };
     if (!row.full_name || !row.class_name) {
-      return setError("Nama dan kelas wajib diisi.");
+      return setError("Nama dan kelas/kategori wajib diisi.");
     }
     setBusy(true);
     const { error: insertError } = await supabase.from("students").insert(row);
@@ -73,7 +73,7 @@ export default function AdminStudents() {
     setInfo("");
     const { rows, invalid } = parseBulk(bulkText, bulkClass);
     if (rows.length === 0) {
-      return setError("Tidak ada baris valid. Isi kelas di kolom Kelas, lalu satu nama per baris.");
+      return setError("Tidak ada baris valid. Isi kelas/kategori, lalu satu nama per baris.");
     }
     // lewati nama yang sudah ada di kelas yang sama
     const existing = new Set(students.map((s) => `${s.class_name}|${s.full_name.toLowerCase()}`));
@@ -137,7 +137,7 @@ export default function AdminStudents() {
     <div>
       <h2>Data Siswa</h2>
       <p className="admin-sub">
-        {students.length} siswa · {activeCount} aktif · Hanya siswa aktif yang muncul di daftar pemilih
+        {students.length} pemilih · {activeCount} aktif · Tambahkan alumni dengan kategori “Alumni” dan biarkan aktif agar muncul di daftar voting
       </p>
 
       {error && <div className="banner banner-danger" style={{ marginBottom: 14 }}>{error}</div>}
@@ -152,8 +152,8 @@ export default function AdminStudents() {
               <input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Nama siswa" />
             </div>
             <div className="form-field">
-              <label>Kelas</label>
-              <input value={form.class_name} onChange={(e) => setForm({ ...form, class_name: e.target.value })} placeholder="mis. X-1" />
+              <label>Kelas / kategori</label>
+              <input value={form.class_name} onChange={(e) => setForm({ ...form, class_name: e.target.value })} placeholder="mis. 7A atau Alumni" />
             </div>
             <button className="btn btn-purple btn-small" disabled={busy}>
               {busy ? "…" : "Tambah siswa"}
@@ -164,11 +164,11 @@ export default function AdminStudents() {
         <div className="card">
           <h3>Impor banyak siswa</h3>
           <p style={{ fontSize: 12.5, color: "var(--color-ink-soft)", marginTop: 0 }}>
-            Isi kelas, lalu tempel daftar nama (satu siswa per baris). Nama yang sudah ada di kelas itu dilewati.
+            Isi kelas/kategori, lalu tempel nama satu per baris. Untuk alumni, gunakan kategori <strong>Alumni</strong>. Nama yang sudah ada di kategori itu dilewati.
           </p>
           <div className="form-field">
-            <label>Kelas</label>
-            <input value={bulkClass} onChange={(e) => setBulkClass(e.target.value)} placeholder="mis. 8B" />
+            <label>Kelas / kategori</label>
+            <input value={bulkClass} onChange={(e) => setBulkClass(e.target.value)} placeholder="mis. 7A atau Alumni" />
           </div>
           <textarea
             value={bulkText}

@@ -15,7 +15,7 @@ Aplikasi voting React + Supabase. Siswa memilih nama dari roster, lalu memberika
 2. Setelah itu jalankan **seluruh** `supabase/migrations/20261031_secret_ballot.sql`. Migrasi ini wajib: ia menghapus alur kode/daftar ulang lama, memindahkan suara lama ke format anonim tanpa waktu atau identitas pemilih, serta memasang RPC dan akses database yang baru. Migrasi bisa dijalankan ulang setelah percobaan terhenti dan tidak menggandakan suara.
 3. Buat akun admin di Authentication → Users.
 4. Salin Project URL dan anon public key dari Project Settings → API ke `.env` sebagai `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY`.
-5. Admin login, lalu isi roster melalui **Data Siswa**. Hanya siswa aktif yang tampil di pemilih nama.
+5. Admin login, lalu isi roster melalui **Data Siswa**. Untuk alumni, tambahkan nama dengan kelas/kategori **Alumni** dan biarkan statusnya aktif. Mereka akan muncul dalam pilihan kelas Alumni di halaman voting.
 
 Untuk instalasi yang sudah berjalan, ekspor/cadangkan database terlebih dahulu lalu jalankan migrasi SQL. Migrasi mempertahankan hasil suara lama dalam bentuk jumlah suara kandidat, lalu menghapus baris lama yang menghubungkan voter dengan kandidat. Kode suara lama dan data pendaftaran ulang dihapus.
 
